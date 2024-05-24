@@ -49,6 +49,17 @@ class robust_differentiator_3rd:
 
         self.threshold = np.array([0.001, 0.001, 0.001])
 
+    def update_k_with_new_omega(self, omega: Union[np.ndarray, list]):
+        m1n1 = omega[0] + omega[1] + omega[2]
+        m2n2 = omega[0] * omega[1] + omega[0] * omega[2] + omega[1] * omega[2]
+        m3n3 = omega[0] * omega[1] * omega[2]
+        self.m1 = m1n1 * np.ones(self.dim)
+        self.m2 = m2n2 * np.ones(self.dim)
+        self.m3 = m3n3 * np.ones(self.dim)
+        self.n1 = m1n1 * np.ones(self.dim)
+        self.n2 = m2n2 * np.ones(self.dim)
+        self.n3 = m3n3 * np.ones(self.dim)
+
     def set_init(self, e0: Union[np.ndarray, list], de0: Union[np.ndarray, list], syst_dynamic: Union[np.ndarray, list]):
         self.z1 = np.array(e0)
         self.z2 = np.array(de0)
@@ -71,8 +82,8 @@ class robust_differentiator_3rd:
                 res.append(np.fabs(xi[i]) ** a * np.sign(xi[i]))
         return np.array(res)
 
-    def observe(self, syst_dynamic: Union[np.ndarray, list], e: Union[np.ndarray, list]):
-        obs_e = e - self.z1
+    def observe(self, syst_dynamic: Union[np.ndarray, list], x: Union[np.ndarray, list]):
+        obs_e = x - self.z1
         self.dz1 = self.z2 + self.m1 * self.sig(obs_e, self.a1) + self.n1 * self.sig(obs_e, self.b1)
         self.dz2 = syst_dynamic + self.z3 + self.m2 * self.sig(obs_e, self.a2) + self.n2 * self.sig(obs_e, self.b2)
         self.dz3 = self.m3 * self.sig(obs_e, self.a3) + self.n3 * self.sig(obs_e, self.b3)

@@ -71,6 +71,7 @@ def generate_uncertainty(time: float, is_ideal: bool = False) -> np.ndarray:
             Fdx = 0.5 * np.sin(w * time + phi0) + 0.2 * np.cos(3 * w * time + phi0) + 0.2
             Fdy = 0.5 * np.cos(w * time + phi0) + 0.2 * np.sin(3 * w * time + phi0) + 0.4
             Fdz = 0.5 * np.sin(w * time + phi0) + 0.2 * np.cos(3 * w * time + phi0) - 0.5
+
             dp = 0.5 * np.sin(w * time + phi0) + 0.2 * np.cos(w * time + phi0)
             dq = 0.5 * np.cos(w * time + phi0) + 0.2 * np.sin(w * time + phi0)
             dr = 0.5 * np.cos(w * time + phi0) + 0.2 * np.sin(w * time + phi0)
@@ -78,17 +79,19 @@ def generate_uncertainty(time: float, is_ideal: bool = False) -> np.ndarray:
             Fdx = 1.5
             Fdy = 0.4 * (time - 5.0)
             Fdz = -0.6
-            dp = 0.5 * np.sin(w * time + phi0) + 0.2 * np.cos(w * time + phi0)
-            dq = 0.5 * np.cos(w * time + phi0) + 0.2 * np.sin(w * time + phi0)
-            dr = 0.5
+
+            dp = 0.5 * np.sin(w * time + phi0) + 0.2 * np.cos(2 * np.sin(2 * w) * time + phi0)
+            dq = 0.5 * np.cos(1.5 * np.sin(2 * w) * time + phi0) + 0.2 * np.sin(w * time + phi0)
+            dr = 0.5 * np.sign(np.round(time - 5) % 2 - 0.5)
         else:
             phi0 = np.pi / 2
-            Fdx = 0.5 * np.sin(w * time + phi0) - 1.0 * np.cos(3 * w + time + phi0)
-            Fdy = 0.5 * np.cos(w * time + phi0) - 1.0 * np.sin(3 * w + time + phi0) + 1.0
-            Fdz = 0.5 * np.sin(w * time + phi0) - 1.0 * np.cos(3 * w + time + phi0) - 0.4
-            dp = 0.5 * np.sin(w * time + phi0) + 0.2 * np.cos(w * time + phi0)
-            dq = 0.5 * np.cos(w * time + phi0) + 0.2 * np.sin(w * time + phi0)
-            dr = 0.5 * np.cos(w * time + phi0) + 0.2 * np.sin(w * time + phi0)
+            Fdx = 0.5 * np.sin(np.cos(2 * w) * time + phi0) - 1.0 * np.cos(3 * np.sin(w) * time + phi0)
+            Fdy = 0.5 * np.sign(np.round(time - 10) % 3 - 1.5) + 0.5 * np.sin(2 * w * time + phi0) - 0.4
+            Fdz = 0.5 * np.cos(w * time + phi0) - 1.0 * np.sin(3 * w + time + phi0) + 1.0
+
+            dp = 0.5 * np.sin(np.sin(2 * w) * time + phi0) + 0.2 * np.cos(w * time + phi0)
+            dq = 1.5 * np.cos(w * time + phi0) + 0.2 * np.sin(w * time + phi0) - 0.7
+            dr = 0.5 * np.cos(2 * w * time + phi0) + 0.6 * np.sin(w * time + phi0)
 
         # Fdx = 0.5 * np.sin(0.8 * np.pi * time) + 0.2 * np.cos(0.4 * np.pi * time)
         # Fdy = 0.5 * np.cos(0.8 * np.pi * time) + 0.2 * np.sin(0.4 * np.pi * time)
