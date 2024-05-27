@@ -7,16 +7,18 @@ import matplotlib.pyplot as plt
 
 class data_collector:
     def __init__(self, N: int):
-        self.t = np.zeros((N, 1)).astype(float)
-        self.control = np.zeros((N, 4)).astype(float)
-        self.ref_angle = np.zeros((N, 3)).astype(float)
-        self.ref_pos = np.zeros((N, 3)).astype(float)
-        self.ref_vel = np.zeros((N, 3)).astype(float)
-        self.d_in = np.zeros((N, 3)).astype(float)
-        self.d_in_obs = np.zeros((N, 3)).astype(float)
-        self.d_out = np.zeros((N, 3)).astype(float)
-        self.d_out_obs = np.zeros((N, 3)).astype(float)
-        self.state = np.zeros((N, 12)).astype(float)
+        self.t = np.zeros((N, 1)).astype(float)             # time
+        self.control = np.zeros((N, 4)).astype(float)       # control input
+        self.ref_angle = np.zeros((N, 3)).astype(float)     # reference attitude
+        self.ref_pos = np.zeros((N, 3)).astype(float)       # reference position
+        self.ref_vel = np.zeros((N, 3)).astype(float)       # reference velocity
+        self.d_in = np.zeros((N, 3)).astype(float)          # real inner-loop disturbance
+        self.d_in_obs = np.zeros((N, 3)).astype(float)      # observer inner-loop disturbance
+        self.d_in_e_1st = np.zeros((N, 3)).astype(float)    # 1st-order inner-loop estimation error
+        self.d_out = np.zeros((N, 3)).astype(float)         # real outer-loop disturbance
+        self.d_out_obs = np.zeros((N, 3)).astype(float)     # observer outer-loop disturbance
+        self.d_out_e_1st = np.zeros((N, 3)).astype(float)   # 1st-order outer-loop estimation error
+        self.state = np.zeros((N, 12)).astype(float)        # uav state
         self.index = 0
         self.name = ['uav_state.csv', 'ref_cmd.csv', 'control.csv', 'observe.csv']
         self.path = os.getcwd() + '/datasave/'
@@ -31,8 +33,10 @@ class data_collector:
             self.ref_vel[self.index] = data['ref_vel']
             self.d_in[self.index] = data['d_in']
             self.d_in_obs[self.index] = data['d_in_obs']
+            self.d_in_e_1st[self.index] = data['d_in_e_1st']
             self.d_out[self.index] = data['d_out']
             self.d_out_obs[self.index] = data['d_out_obs']
+            self.d_out_e_1st[self.index] = data['d_out_e_1st']
             self.state[self.index] = data['state']
             self.index += 1
 
@@ -49,8 +53,14 @@ class data_collector:
                      columns=['time', 'throttle', 'torque_x', 'torque_y', 'torque_z']). \
             to_csv(path + self.name[2], sep=',', index=False)
 
-        pd.DataFrame(np.hstack((self.t, self.d_in, self.d_in_obs, self.d_out, self.d_out_obs)),
-                     columns=['time', 'in1', 'in2', 'in3', 'in1_obs', 'in2_obs', 'in3_obs', 'out1', 'out2', 'out3', 'out1_obs', 'out2_obs', 'out3_obs']). \
+        pd.DataFrame(np.hstack((self.t, self.d_in, self.d_in_obs, self.d_in_e_1st, self.d_out, self.d_out_obs, self.d_out_e_1st)),
+                     columns=['time',
+                              'in1', 'in2', 'in3',
+                              'in1_obs', 'in2_obs', 'in3_obs',
+                              'in1_e_1st', 'in2_e_1st', 'in3_e_1st',
+                              'out1', 'out2', 'out3',
+                              'out1_obs', 'out2_obs', 'out3_obs',
+                              'out1_e_1st', 'out2_e_1st', 'out3_e_1st']). \
             to_csv(path + self.name[3], sep=',', index=False)
 
     def load_file(self, path: str):
@@ -64,7 +74,15 @@ class data_collector:
         self.ref_pos = ref_cmdData[:, 1: 4]
         self.ref_vel = ref_cmdData[:, 4: 7]
         self.ref_angle = ref_cmdData[:, 7: 10]
-        self.d_in, self.d_in_obs, self.d_out, self.d_out_obs = observeData[:, 1:4], observeData[:, 4:7], observeData[7:10], observeData[10:13]
+
+        self.d_in = observeData[:, 1:4]
+        self.d_in_obs = observeData[:, 4:7]
+        self.d_in_e_1st = observeData[7:10]
+
+        self.d_out = observeData[10:13]
+        self.d_out_obs = observeData[13:16]
+        self.d_out_e_1st = observeData[16:19]
+
         self.state = uav_stateData[:, 1: 13]
 
     def plot_pos(self):
@@ -212,6 +230,28 @@ class data_collector:
         # plt.ylim((-4, 4))
         plt.title('observe dr')
 
+        plt.figure()
+        plt.subplot(1, 3, 1)
+        plt.plot(self.t, self.d_in_e_1st[:, 0], 'red')
+        plt.grid(True)
+        plt.xlabel('time(s)')
+        # plt.ylim((-4, 4))
+        plt.title('1st_error dp')
+
+        plt.subplot(1, 3, 2)
+        plt.plot(self.t, self.d_in_e_1st[:, 1], 'red')
+        plt.grid(True)
+        plt.xlabel('time(s)')
+        # plt.ylim((-4, 4))
+        plt.title('1st_errordq')
+
+        plt.subplot(1, 3, 3)
+        plt.plot(self.t, self.d_in_e_1st[:, 2], 'red')
+        plt.grid(True)
+        plt.xlabel('time(s)')
+        # plt.ylim((-4, 4))
+        plt.title('1st_error dr')
+
     def plot_outer_obs(self):
         plt.figure()
         plt.subplot(1, 3, 1)
@@ -237,3 +277,25 @@ class data_collector:
         plt.xlabel('time(s)')
         # plt.ylim((-4, 4))
         plt.title('observe dz')
+
+        plt.figure()
+        plt.subplot(1, 3, 1)
+        plt.plot(self.t, self.d_out_e_1st[:, 0], 'red')
+        plt.grid(True)
+        plt.xlabel('time(s)')
+        # plt.ylim((-4, 4))
+        plt.title('1st_error dx')
+
+        plt.subplot(1, 3, 2)
+        plt.plot(self.t, self.d_out_e_1st[:, 1], 'red')
+        plt.grid(True)
+        plt.xlabel('time(s)')
+        # plt.ylim((-4, 4))
+        plt.title('1st_error dy')
+
+        plt.subplot(1, 3, 3)
+        plt.plot(self.t, self.d_out_e_1st[:, 2], 'red')
+        plt.grid(True)
+        plt.xlabel('time(s)')
+        # plt.ylim((-4, 4))
+        plt.title('1st_error dz')

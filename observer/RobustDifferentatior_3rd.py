@@ -12,6 +12,7 @@ class robust_differentiator_3rd:
                  n3: Union[np.ndarray, list] = np.array([0, 0, 0]),
                  use_freq: bool = False,
                  omega: Union[np.ndarray, list] = np.array([0, 0, 0]),
+                 thresh: Union[np.ndarray, list] = np.array([1e-2, 1e-2, 1e-2]),
                  dim: int = 3,
                  dt: float = 0.001):
         self.a1 = 3. / 4.
@@ -22,8 +23,8 @@ class robust_differentiator_3rd:
         self.b3 = 7. / 4.
         if use_freq:
             m1n1 = omega[0] + omega[1] + omega[2]
-            m2n2 = omega[0]*omega[1]+omega[0]*omega[2]+omega[1]*omega[2]
-            m3n3 = omega[0]*omega[1]*omega[2]
+            m2n2 = omega[0] * omega[1] + omega[0] * omega[2] + omega[1] * omega[2]
+            m3n3 = omega[0] * omega[1] * omega[2]
             self.m1 = m1n1 * np.ones(dim)
             self.m2 = m2n2 * np.ones(dim)
             self.m3 = m3n3 * np.ones(dim)
@@ -48,6 +49,8 @@ class robust_differentiator_3rd:
         self.dt = dt
 
         self.threshold = np.array([0.001, 0.001, 0.001])
+        self.error_thresh = thresh
+        self.obs_error = np.zeros(dim)
 
     def update_k_with_new_omega(self, omega: Union[np.ndarray, list]):
         m1n1 = omega[0] + omega[1] + omega[2]
@@ -82,11 +85,26 @@ class robust_differentiator_3rd:
                 res.append(np.fabs(xi[i]) ** a * np.sign(xi[i]))
         return np.array(res)
 
+    def kappa(self):
+        """
+        :return:    if error is large, return 0; else return 1
+        """
+        e = np.fabs(self.obs_error)
+        return np.clip(np.sign(self.error_thresh - e), 0, 1)
+
     def observe(self, syst_dynamic: Union[np.ndarray, list], x: Union[np.ndarray, list]):
-        obs_e = x - self.z1
-        self.dz1 = self.z2 + self.m1 * self.sig(obs_e, self.a1) + self.n1 * self.sig(obs_e, self.b1)
-        self.dz2 = syst_dynamic + self.z3 + self.m2 * self.sig(obs_e, self.a2) + self.n2 * self.sig(obs_e, self.b2)
-        self.dz3 = self.m3 * self.sig(obs_e, self.a3) + self.n3 * self.sig(obs_e, self.b3)
+        self.obs_error = x - self.z1
+        kappa = self.kappa()
+        self.dz1 = (self.z2 +
+                    kappa * self.m1 * self.sig(self.obs_error, self.a1) +
+                    (1 - kappa) * self.n1 * self.sig(self.obs_error, self.b1))
+        self.dz2 = (syst_dynamic +
+                    self.z3 +
+                    kappa * self.m2 * self.sig(self.obs_error, self.a2) +
+                    (1 - kappa) * self.n2 * self.sig(self.obs_error, self.b2))
+        self.dz3 = (kappa * self.m3 * self.sig(self.obs_error, self.a3) +
+                    (1 - kappa) * self.n3 * self.sig(self.obs_error, self.b3))
+
         self.z1 = self.z1 + self.dz1 * self.dt
         self.z2 = self.z2 + self.dz2 * self.dt
         self.z3 = self.z3 + self.dz3 * self.dt
