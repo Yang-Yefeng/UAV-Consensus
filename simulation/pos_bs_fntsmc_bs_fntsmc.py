@@ -124,7 +124,7 @@ if __name__ == '__main__':
 		obs_in = rd3(use_freq=True,
 					 omega=np.array([3.5, 3.4, 10]),
 					 dim=3,
-                     thresh=np.array([0.5, 0.5, 0.5]),
+					 thresh=np.array([0.5, 0.5, 0.5]),
 					 dt=uav.dt)
 		syst_dyin = np.dot(uav.dW(), uav.omega()) + np.dot(uav.W(), uav.A_omega() + np.dot(uav.B_omega(), ctrl_in.control_in))
 		obs_in.set_init(e0=e_rho, de0=de_rho, syst_dynamic=syst_dyin)
@@ -132,7 +132,7 @@ if __name__ == '__main__':
 		obs_out = rd3(use_freq=True,
 					  omega=np.array([4, 4, 4]),  # 实际实验这个数一定要小 0.9, 0.9, 0.9，或者从小往大调
 					  dim=3,
-                      thresh=np.array([0.5, 0.5, 0.5]),
+					  thresh=np.array([0.5, 0.5, 0.5]),
 					  dt=uav.dt)
 		syst_dyout = -uav.kt / uav.m * uav.dot_eta() + uav.A()
 		obs_out.set_init(e0=uav.eta(), de0=uav.dot_eta(), syst_dynamic=syst_dyout)

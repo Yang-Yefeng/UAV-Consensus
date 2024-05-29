@@ -63,14 +63,25 @@ class robust_differentiator_3rd:
         self.n2 = m2n2 * np.ones(self.dim)
         self.n3 = m3n3 * np.ones(self.dim)
 
-    def set_init(self, e0: Union[np.ndarray, list], de0: Union[np.ndarray, list], syst_dynamic: Union[np.ndarray, list]):
-        self.z1 = np.array(e0)
-        self.z2 = np.array(de0)
-        self.z3 = np.zeros(self.dim)
-
-        self.dz1 = self.z2.copy()
-        self.dz2 = self.z3.copy() + syst_dynamic
-        self.dz3 = np.zeros(self.dim)
+    def set_init(self,
+                 e0: Union[np.ndarray, list]=np.zeros(3),
+                 de0: Union[np.ndarray, list]=np.zeros(3),
+                 syst_dynamic: Union[np.ndarray, list]=np.zeros(3),
+                 all_zero:bool=False):
+        if all_zero:
+            self.z1 = np.zeros(self.dim)
+            self.z2 = np.zeros(self.dim)
+            self.z3 = np.zeros(self.dim)
+            self.dz1 = self.z2.copy()
+            self.dz2 = self.z3.copy()
+            self.dz3 = np.zeros(self.dim)
+        else:
+            self.z1 = np.array(e0)
+            self.z2 = np.array(de0)
+            self.z3 = np.zeros(self.dim)
+            self.dz1 = self.z2.copy()
+            self.dz2 = self.z3.copy() + syst_dynamic
+            self.dz3 = np.zeros(self.dim)
 
     @staticmethod
     def sig(x: Union[np.ndarray, list], a):
