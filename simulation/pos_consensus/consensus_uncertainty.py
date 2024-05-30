@@ -139,13 +139,14 @@ def generate_uncertainty4(time: float, is_ideal: bool = False) -> np.ndarray:
 
 
 def consensus_uncertainty(time, is_ideal: bool = False) -> np.ndarray:
-	return np.concatenate((generate_uncertainty1(time, is_ideal),
-						   generate_uncertainty2(time, is_ideal),
-						   generate_uncertainty3(time, is_ideal),
-						   generate_uncertainty4(time, is_ideal)))
+	return generate_uncertainty1(time, is_ideal)
+	# return np.concatenate((generate_uncertainty1(time, is_ideal),
+	# 					   generate_uncertainty2(time, is_ideal),
+	# 					   generate_uncertainty3(time, is_ideal),
+	# 					   generate_uncertainty4(time, is_ideal)))
 
 
-def consensus_uncertainty_N(is_ideal: bool = False, dt: float = 0., tm: float = 20, num_uav: int = 4) -> np.ndarray:
+def consensus_uncertainty_N(is_ideal: bool = False, dt: float = 0.001, tm: float = 20, num_uav: int = 4) -> np.ndarray:
 	res = np.zeros((int(tm / dt), num_uav * 6))
 	t = 0.
 	i = 0

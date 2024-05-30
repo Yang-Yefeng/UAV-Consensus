@@ -36,7 +36,6 @@ class usv_consensus:
         self.b = communication                      # 这个无人机与leader的联通
         self.is_ideal = is_ideal                    # 是否有干扰
         self.data_record = data_collector(N=int(uav_param.time_max / uav_param.dt))
-        self.rho_d = 0.         # 该无人机的期望内环指令
-        self.dot_rho_d = 0.     # 该无人机的期望内环指令导数
+        self.rho_d = np.zeros(3)         # 该无人机的期望内环指令
+        self.dot_rho_d = np.zeros(3)     # 该无人机的期望内环指令导数
         self.throttle = 0.      # 该无人机的推力
-

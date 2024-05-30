@@ -21,7 +21,7 @@ cur_path = os.path.dirname(os.path.abspath(__file__))
 windows = platform.system().lower() == 'windows'
 
 '''Parameter list of the quadrotor'''
-DT = 0.001
+DT = 0.01
 uav_param = uav_param()
 uav_param.m = 0.8
 uav_param.g = 9.8
@@ -131,6 +131,10 @@ if __name__ == '__main__':
         '''5. 状态更新'''
 
         '''6. 数据存储'''
+        if IS_IDEAL:
+            in_obs_error = np.zeros(3)
+        else:
+            in_obs_error = observer.obs_error
         data_block = {'time': uav.time,
                       'control': action_4_uav,
                       'ref_angle': rhod,
@@ -138,10 +142,12 @@ if __name__ == '__main__':
                       'ref_vel': np.array([0., 0., 0.]),
                       'd_in': np.dot(uav.W(), np.array([uncertainty[3], uncertainty[4], uncertainty[5]])),
                       'd_in_obs': delta_obs,
+                      'd_in_e_1st': in_obs_error,
                       # 'd_in': np.array([uncertainty[3], uncertainty[4], uncertainty[5]]),
                       # 'd_in_obs': np.dot(np.linalg.inv(uav.W()), delta_obs),
                       'd_out': np.array([uncertainty[0], uncertainty[1], uncertainty[2]]) / uav.m,
                       'd_out_obs': np.array([0., 0., 0.]),
+                      'd_out_e_1st': np.zeros(3),
                       'state': np.hstack((np.zeros(6), uav.uav_att_pqr_call_back()))}
         data_record.record(data=data_block)
         '''6. 数据存储'''

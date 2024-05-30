@@ -28,13 +28,10 @@ g_tm = 20  # global maximum simulation time
 g_ideal = True  # global ideal
 g_obs_in = 'rd3'
 g_obs_out = 'rd3'
-UAV_NUM = 4
-g_A = np.array([[0, 1, 1, 0],
-                [1, 0, 0, 1],
-                [1, 0, 0, 0],
-                [0, 1, 0, 0]]).astype(float)  # 邻接矩阵
-g_D = np.array([2, 2, 1, 1]).astype(float)  # 入度矩阵
-g_B = np.array([1, 0, 0, 0]).astype(float)  # 通信矩阵
+UAV_NUM = 1
+g_A = np.array([[0]]).astype(float)  # 邻接矩阵
+g_D = np.array([0]).astype(float)  # 入度矩阵
+g_B = np.array([1]).astype(float)  # 通信矩阵
 IS_IDEAL = True
 
 cur_time = datetime.datetime.strftime(datetime.datetime.now(), '%Y-%m-%d-%H-%M-%S')
@@ -136,10 +133,7 @@ ref_bias_phase = np.array([np.pi / 2, 0, 0, 0])
 
 '''local bias'''
 r = 0.5
-bias = np.array([[r, 0, 0, 0],
-                 [0., r, 0., 0.],
-                 [-r, 0., 0., 0.],
-                 [0., -r, 0., 0.]]).astype(float)
+bias = np.array([[0, 0, 0, 0]]).astype(float)
 '''local bias'''
 
 '''calculate global eta, dot_eta'''
