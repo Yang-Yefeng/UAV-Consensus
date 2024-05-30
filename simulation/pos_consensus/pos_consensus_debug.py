@@ -21,7 +21,7 @@ from consensus_uncertainty import *
 # from utils.collector import data_collector
 
 '''global variables'''
-g_dt = 0.01  # global sampling period
+g_dt = 0.001  # global sampling period
 g_t = 0.  # global time
 g_N = 0  # global step
 g_tm = 20  # global maximum simulation time
@@ -194,7 +194,7 @@ if __name__ == '__main__':
             '''1.3 transfer virtual control command to actual throttle, phi_d, and theta_d'''
             phi_d_old = uavs[i].rho_d[0]
             theta_d_old = uavs[i].rho_d[1]
-            phi_d, theta_d, throttle = uo_2_ref_angle_throttle(uo=uavs[i].ctrl_pos.control_out,
+            phi_d, theta_d, throttle = uo_2_ref_angle_throttle(uo=uavs[i].ctrl_pos.control_out_consensus,
                                                                att=uavs[i].uav.uav_att(),
                                                                m=uavs[i].uav.m,
                                                                g=uavs[i].uav.g)

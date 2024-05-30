@@ -4,7 +4,7 @@ from utils.collector import data_collector
 
 if __name__ == '__main__':
     uav_num = 1
-    dir_name = './pos_consensus-2024-05-30-16-41-19/'  # select the directory
+    dir_name = './pos_consensus-2024-05-30-16-48-41/'  # select the directory
     data_record = []
     for i in range(uav_num):
         temp = data_collector(0)

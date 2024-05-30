@@ -17,7 +17,7 @@ from utils.utils import *
 from utils.collector import data_collector
 
 '''Parameter list of the quadrotor'''
-DT = 0.01
+DT = 0.001
 uav_param = uav_param()
 uav_param.m = 0.8
 uav_param.g = 9.8
