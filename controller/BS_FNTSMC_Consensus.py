@@ -67,4 +67,4 @@ class bs_fntsmc_consensus(bs_fntsmc):
         u1 = -S
         u2 = -(D + B) * obs - self.k4 * np.tanh(5 * self.s)
         u3 = -self.k5 * self.sig(self.s, self.alpha2)
-        self.control_out_consensus = -(u1 + u2 + u3) / (D + B)
+        self.control_out_consensus = (u1 + u2 + u3) / (D + B)

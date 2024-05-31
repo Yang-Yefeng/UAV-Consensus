@@ -24,18 +24,41 @@ from consensus_uncertainty import *
 g_dt = 0.01  # global sampling period
 g_t = 0.  # global time
 g_N = 0  # global step
-g_tm = 20  # global maximum simulation time
+g_tm = 100  # global maximum simulation time
 g_ideal = True  # global ideal
 g_obs_in = 'rd3'
 g_obs_out = 'rd3'
 UAV_NUM = 4
+
 g_A = np.array([[0, 1, 1, 0],
                 [1, 0, 0, 1],
                 [1, 0, 0, 0],
                 [0, 1, 0, 0]]).astype(float)  # 邻接矩阵
 g_D = np.array([2, 2, 1, 1]).astype(float)  # 入度矩阵
 g_B = np.array([1, 0, 0, 0]).astype(float)  # 通信矩阵
-IS_IDEAL = True
+
+'''一字型拓扑'''
+# g_A = np.array([[0, 1, 0, 0],
+#                 [1, 0, 1, 0],
+#                 [0, 1, 0, 1],
+#                 [0, 0, 1, 0]]).astype(float)  # 邻接矩阵
+# g_D = np.array([1, 2, 2, 1]).astype(float)  # 入度矩阵
+# g_B = np.array([1, 0, 0, 0]).astype(float)  # 通信矩阵
+
+
+# g_A = np.array([[0, 0, 0, 0],
+#                 [1, 0, 0, 0],
+#                 [1, 0, 0, 0],
+#                 [1, 0, 0, 0]]).astype(float)  # 邻接矩阵
+# g_D = np.array([0, 1, 1, 1]).astype(float)  # 入度矩阵
+# g_B = np.array([1, 0, 0, 0]).astype(float)  # 通信矩阵
+
+# g_A = np.array([[0, 0, 0, 0],
+#                 [0, 0, 0, 0],
+#                 [0, 0, 0, 0],
+#                 [0, 0, 0, 0]]).astype(float)  # 邻接矩阵
+# g_D = np.array([0, 0, 0, 0]).astype(float)  # 入度矩阵
+# g_B = np.array([1, 1, 1, 1]).astype(float)  # 通信矩阵
 
 cur_time = datetime.datetime.strftime(datetime.datetime.now(), '%Y-%m-%d-%H-%M-%S')
 cur_path = os.path.dirname(os.path.abspath(__file__))
@@ -122,24 +145,24 @@ for i in range(UAV_NUM):
                         communication=g_B[i],
                         obs_att=obs_in,
                         obs_pos=obs_out,
-                        is_ideal=IS_IDEAL)
+                        is_ideal=g_ideal)
     uavs.append(uav)
 '''uav group initialization'''
 
 '''global trajectory'''
-ref_amplitude = np.array([4, 4, 2, np.pi / 2])  # x y z psi
-# ref_amplitude = np.array([0, 0, 0, 0])  # x y z psi
+# ref_amplitude = np.array([2, 2, 1, np.pi / 2])  # x y z psi
+ref_amplitude = np.array([0, 0, 0, 0])  # x y z psi
 ref_period = np.array([5, 5, 4, 5])
 ref_bias_a = np.array([2, 2, 1, 0])
 ref_bias_phase = np.array([np.pi / 2, 0, 0, 0])
 '''global trajectory'''
 
 '''local bias'''
-r = 0.5
-bias = np.array([[r, 0, 0, 0],
-                 [0., r, 0., 0.],
-                 [-r, 0., 0., 0.],
-                 [0., -r, 0., 0.]]).astype(float)
+r = 0.
+bias = np.array([[r, 0, 0],
+                 [0., r, 0.],
+                 [-r, 0., 0.],
+                 [0., -r, 0.]]).astype(float)
 '''local bias'''
 
 '''calculate global eta, dot_eta'''
@@ -148,9 +171,9 @@ bias = np.array([[r, 0, 0, 0],
 def cal_g_eta_dot_eta():
     _res = np.zeros((UAV_NUM, 3))
     _dot_res = np.zeros((UAV_NUM, 3))
-    for _uav in uavs:
-        _res[i][:] = _uav.uav.eta()
-        _dot_res[i][:] = _uav.uav.dot_eta()
+    for p in range(UAV_NUM):
+        _res[p][:] = uavs[p].uav.eta()
+        _dot_res[p][:] = uavs[p].uav.dot_eta()
     return _res, _dot_res
 
 
@@ -159,7 +182,7 @@ def cal_g_eta_dot_eta():
 '''control'''
 if __name__ == '__main__':
     '''1. generate uncertainty for all UAVs'''
-    consensus_un = consensus_uncertainty_N(is_ideal=IS_IDEAL, dt=g_dt, tm=g_tm, num_uav=UAV_NUM)  # (20000, 24)
+    consensus_un = consensus_uncertainty_N(is_ideal=g_ideal, dt=g_dt, tm=g_tm, num_uav=UAV_NUM)  # (20000, 24)
     print(consensus_un.shape)
 
     while g_t < g_tm - g_dt / 2:
@@ -167,15 +190,18 @@ if __name__ == '__main__':
             print('time: %.2f s.' % (g_N / int(1 / g_dt)))
 
         '''2. calculations for each UAV'''
+        g_eta, g_dot_eta = cal_g_eta_dot_eta()      # 先计算全局状态
+        # print('global_state: ', g_eta)
+
         for i in range(UAV_NUM):  # 对于每一个无人机
             '''1.1 generate reference command, uncertainty, and bias for each uav'''
             dis_i = consensus_un[g_N, 6 * i: 6 * (i + 1)]
-            ref_i, dot_ref_i, _, _ = ref_uav(g_t, ref_amplitude, ref_period, ref_bias_a, ref_bias_phase)
+            ref, dot_ref, _, _ = ref_uav(g_t, ref_amplitude, ref_period, ref_bias_a, ref_bias_phase)
             bias_i = bias[i]
             dot_bias_i = np.zeros(4)
 
-            eta_d_i = ref_i[0: 3] + bias_i[0: 3]  # eta 表示外环，d表示参考，i表示无人机编号
-            dot_eta_d_i = dot_ref_i[0: 3] + dot_bias_i[0: 3]  # dot 表示一阶导数，eta表示外环，d表示参考，i表示无人机编号
+            eta_d_i = ref[0: 3] + bias_i[0: 3]  # eta 表示外环，d表示参考，i表示无人机编号
+            dot_eta_d_i = dot_ref[0: 3] + dot_bias_i[0: 3]  # dot 表示一阶导数，eta表示外环，d表示参考，i表示无人机编号
 
             if not uavs[i].is_ideal:
                 syst_dynamic_i = -uavs[i].uav.kt / uavs[i].uav.m * uavs[i].uav.dot_eta() + uavs[i].uav.A()
@@ -184,7 +210,6 @@ if __name__ == '__main__':
                 obs_eta_i = np.zeros(3)
 
             '''1.2 calculate consensus error'''
-            g_eta, g_dot_eta = cal_g_eta_dot_eta()
             uavs[i].ctrl_pos.control_update_outer_consensus(g_eta,
                                                             g_dot_eta,
                                                             eta_d_i,
@@ -197,18 +222,20 @@ if __name__ == '__main__':
                                                             uavs[i].uav.kt,
                                                             uavs[i].uav.m,
                                                             obs_eta_i)  # 无人机外环控制
+            yyf_acc = uavs[i].ctrl_pos.control_out_consensus
+            # print('i: %d.  acc=[%.2f, %.2f, %.2f]' % (i, yyf_acc[0], yyf_acc[1], yyf_acc[2]))
             '''1.3 transfer virtual control command to actual throttle, phi_d, and theta_d'''
             phi_d_old = uavs[i].rho_d[0]
             theta_d_old = uavs[i].rho_d[1]
-            phi_d, theta_d, throttle = uo_2_ref_angle_throttle(uo=uavs[i].ctrl_pos.control_out,
+            phi_d, theta_d, throttle = uo_2_ref_angle_throttle(uo=uavs[i].ctrl_pos.control_out_consensus,
                                                                att=uavs[i].uav.uav_att(),
                                                                m=uavs[i].uav.m,
                                                                g=uavs[i].uav.g)
 
             dot_phi_d = (phi_d - phi_d_old) / uavs[i].uav.dt
             dot_theta_d = (theta_d - theta_d_old) / uavs[i].uav.dt
-            uavs[i].rho_d = np.array([phi_d, theta_d, ref_i[3]])  # phi_d theta_d psi_d
-            uavs[i].dot_rho_d = np.array([dot_phi_d, dot_theta_d, dot_ref_i[3]])  # phi_d theta_d psi_d 的一阶导数
+            uavs[i].rho_d = np.array([phi_d, theta_d, ref[3]])  # phi_d theta_d psi_d
+            uavs[i].dot_rho_d = np.array([dot_phi_d, dot_theta_d, dot_ref[3]])  # phi_d theta_d psi_d 的一阶导数
             uavs[i].throttle = throttle
 
             '''1.4 inner loop control'''
@@ -245,8 +272,8 @@ if __name__ == '__main__':
             data_block_i = {'time': uavs[i].uav.time,
                             'control': action_4_uav_i,
                             'ref_angle': uavs[i].rho_d,
-                            'ref_pos': ref_i[0: 3],
-                            'ref_vel': dot_ref_i[0: 3],
+                            'ref_pos': ref[0: 3],
+                            'ref_vel': dot_ref[0: 3],
                             'd_in': np.array([0., 0., np.dot(uavs[i].uav.W(), np.array([dis_i[3], dis_i[4], dis_i[5]]))[2]]),
                             'd_in_obs': obs_rho_i,
                             'd_in_e_1st': uavs[i].obs_att.obs_error,

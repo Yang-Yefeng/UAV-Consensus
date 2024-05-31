@@ -21,7 +21,7 @@ from consensus_uncertainty import *
 # from utils.collector import data_collector
 
 '''global variables'''
-g_dt = 0.001  # global sampling period
+g_dt = 0.01  # global sampling period
 g_t = 0.  # global time
 g_N = 0  # global step
 g_tm = 20  # global maximum simulation time
@@ -39,9 +39,9 @@ cur_path = os.path.dirname(os.path.abspath(__file__))
 windows = platform.system().lower() == 'windows'
 print(cur_path)
 if windows:
-    new_path = cur_path + '\\..\\..\\datasave\\pos_consensus-' + cur_time + '/'
+    new_path = cur_path + '\\..\\..\\datasave\\pos_consensus_debug-' + cur_time + '/'
 else:
-    new_path = cur_path + '/../../datasave/pos_consensus-' + cur_time + '/'
+    new_path = cur_path + '/../../datasave/pos_consensus_debug-' + cur_time + '/'
 '''global variables'''
 
 '''Parameter list of the quadrotor'''
@@ -124,8 +124,8 @@ for i in range(UAV_NUM):
 '''uav group initialization'''
 
 '''global trajectory'''
-ref_amplitude = np.array([4, 4, 2, np.pi / 2])  # x y z psi
-# ref_amplitude = np.array([0, 0, 0, 0])  # x y z psi
+# ref_amplitude = np.array([2, 2, 1, np.pi / 2])  # x y z psi
+ref_amplitude = np.array([0, 0, 0, 0])  # x y z psi
 ref_period = np.array([5, 5, 4, 5])
 ref_bias_a = np.array([2, 2, 1, 0])
 ref_bias_phase = np.array([np.pi / 2, 0, 0, 0])
@@ -142,9 +142,9 @@ bias = np.array([[0, 0, 0, 0]]).astype(float)
 def cal_g_eta_dot_eta():
     _res = np.zeros((UAV_NUM, 3))
     _dot_res = np.zeros((UAV_NUM, 3))
-    for _uav in uavs:
-        _res[i][:] = _uav.uav.eta()
-        _dot_res[i][:] = _uav.uav.dot_eta()
+    for p in range(UAV_NUM):
+        _res[p][:] = uavs[p].uav.eta()
+        _dot_res[p][:] = uavs[p].uav.dot_eta()
     return _res, _dot_res
 
 

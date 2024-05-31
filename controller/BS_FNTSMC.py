@@ -72,7 +72,6 @@ class bs_fntsmc:
     def bs_outer(self, e_eta: np.ndarray, d_ref: np.ndarray):
         return -self.k1 * e_eta + d_ref
 
-
     def control_update_inner(self,
                              e_rho: np.ndarray,
                              de_rho: np.ndarray,
