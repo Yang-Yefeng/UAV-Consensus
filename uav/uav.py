@@ -19,22 +19,40 @@ class uav_param:
 				 angle0: np.ndarray = np.array([0, 0, 0]),
 				 pqr0: np.ndarray = np.array([0, 0, 0]),
 				 dt=0.001,
-				 time_max=30):
-		self.m = m
-		self.g = g
-		self.J = J
-		self.d = d
-		self.CT = CT
-		self.CM = CM
-		self.J0 = J0
-		self.kr = kr
-		self.kt = kt
-		self.pos0 = pos0
-		self.vel0 = vel0
-		self.angle0 = angle0
-		self.pqr0 = pqr0
-		self.dt = dt
-		self.time_max = time_max
+				 time_max=30,
+				 from_dict: dict = None):
+		if from_dict:
+			self.m = from_dict['m']
+			self.g = from_dict['g']
+			self.J = from_dict['J']
+			self.d = from_dict['d']
+			self.CT = from_dict['CT']
+			self.CM = from_dict['CM']
+			self.J0 = from_dict['J0']
+			self.kr = from_dict['kr']
+			self.kt = from_dict['kt']
+			self.pos0 = from_dict['pos0']
+			self.vel0 = from_dict['vel0']
+			self.angle0 = from_dict['angle0']
+			self.pqr0 = from_dict['pqr0']
+			self.dt = from_dict['dt']
+			self.time_max = from_dict['time_max']
+		else:
+			self.m = m
+			self.g = g
+			self.J = J
+			self.d = d
+			self.CT = CT
+			self.CM = CM
+			self.J0 = J0
+			self.kr = kr
+			self.kt = kt
+			self.pos0 = pos0
+			self.vel0 = vel0
+			self.angle0 = angle0
+			self.pqr0 = pqr0
+			self.dt = dt
+			self.time_max = time_max
 
 	def print_param(self):
 		print('    m   : ', self.m)

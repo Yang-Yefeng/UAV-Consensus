@@ -17,7 +17,7 @@ from utils.utils import *
 from utils.collector import data_collector
 
 '''Parameter list of the quadrotor'''
-DT = 0.001
+DT = 0.01
 uav_param = uav_param()
 uav_param.m = 0.8
 uav_param.g = 9.8
@@ -46,12 +46,12 @@ att_ctrl_param = bs_fntsmc_param(
     # alpha1=np.array([1.5, 1.5, 1.5]),
     # alpha2=np.array([2, 2, 2]),
     k1=np.array([5, 5, 5]),
-    k2=np.array([8., 8., 20.]),
+    k2=np.array([2., 2., 10.]),
     k3=np.array([1., 1., 1.5]),
     k4=np.array([0.05, 0.05, 0.05]),
     k5=np.array([5, 5, 5]),  # 要大
-    alpha1=np.array([1.2, 1.2, 1.5]),
-    alpha2=np.array([1.2, 1.2, 1.5]),
+    alpha1=np.array([1.01, 1.01, 1.01]),
+    alpha2=np.array([1.01, 1.01, 1.01]),
     dim=3,
     dt=DT
     # k1 控制反步中 wd 的反馈大小
@@ -73,19 +73,19 @@ pos_ctrl_param = bs_fntsmc_param(
     # alpha2=np.array([1.2, 1.2, 1.2]),
     # dim=3,
     # dt=DT
-    k1=np.array([8, 8, 4]),
+    k1=np.array([4, 4, 4]),
     k2=np.array([0.3, 0.3, 1.0]),
     k3=np.array([0.5, 0.5, 1]),
     k4=np.array([0.05, 0.05, 0.05]),        # 补偿观测器的，小点就行
     k5=np.array([6, 6, 6]),
-    alpha1=np.array([1.8, 1.8, 1.8]),
+    alpha1=np.array([1.01, 1.01, 1.01]),
     alpha2=np.array([1.01, 1.01, 1.01]),
     dim=3,
     dt=DT
 )
 '''Parameter list of the position controller'''
 
-IS_IDEAL = False
+IS_IDEAL = True
 OBSERVER_IN = 'rd3'
 OBSERVER_OUT = 'rd3'
 
@@ -244,12 +244,12 @@ if __name__ == '__main__':
         data_record.package2file(new_path)
 
     data_record.plot_att()
-    data_record.plot_vel()
+    # data_record.plot_vel()
     data_record.plot_pos()
     data_record.plot_throttle()
     data_record.plot_torque()
-    data_record.plot_inner_obs()
-    data_record.plot_outer_obs()
+    # data_record.plot_inner_obs()
+    # data_record.plot_outer_obs()
     # data_record.plot_outer_obs()
     # data_record.plot_inner_obs()
     plt.show()

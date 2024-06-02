@@ -42,13 +42,13 @@ uav_param.time_max = 20
 
 '''Parameter list of the attitude controller'''
 att_ctrl_param = bs_fntsmc_param(
-    k1=np.array([5, 5, 5]),
+    k1=np.array([3, 3, 3]),
     k2=np.array([8., 8., 20.]),
     k3=np.array([1., 1., 1.5]),
     k4=np.array([0.05, 0.05, 0.05]),
     k5=np.array([5, 4, 5]),       # 要大
-    alpha1=np.array([1.2, 1.2, 1.5]),
-    alpha2=np.array([1.2, 1.2, 1.5]),
+    alpha1=np.array([1.01, 1.01, 1.01]),
+    alpha2=np.array([1.01, 1.01, 1.01]),
     dim=3,
     dt=DT
     # k1 控制反步中 wd 的反馈大小

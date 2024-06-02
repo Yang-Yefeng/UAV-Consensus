@@ -1,0 +1,88 @@
+<?xml version='1.0' encoding='utf-8'?>
+
+<global_initialization>
+    <global_variable>
+        <dt>0.01</dt>                   <!--global sampling period-->
+        <g_t>0.</g_t>                   <!--global time-->
+        <g_N>0</g_N>                    <!--global index-->
+        <g_tm>20</g_tm>                 <!--global maximum simulation time-->
+        <g_ideal>0</g_ideal>            <!--global ideal-->
+        <g_obs_in>'rd3'</g_obs_in>      <!--inner-loop observer-->
+        <g_obs_out>'rd3'</g_obs_out>    <!--outer-loop observer-->
+        <uav_num>4</uav_num>            <!--number of UAV-->
+        <g_A>[[0, 0, 0, 0], [1, 0, 0, 0], [1, 0, 0, 0], [1, 0, 0, 0]]</g_A>     <!-- adjacent matrix -->
+        <g_D>[0, 1, 1, 1]</g_D>         <!--in-degree-->
+        <g_B>[1, 0, 0, 0]</g_B>         <!--communication-->
+    </global_variable>
+
+    <uav_param>
+        <m>0.8</m>
+        <g>9.8</g>
+        <J>[4.212e-3, 4.212e-3, 8.255e-3]</J>
+        <d>0.12</d>
+        <CT>2.168e-6</CT>
+        <CM>2.136e-8</CM>
+        <J0>1.01e-5</J0>
+        <kr>1e-3</kr>
+        <kt>1e-3</kt>
+        <pos0>[0, 0, 0]</pos0>
+        <vel0>[0, 0, 0]</vel0>
+        <angle0>[0, 0, 0]</angle0>
+        <pqr0>[0, 0, 0]</pqr0>
+        <dt>0.01</dt>
+        <time_max>20</time_max>
+    </uav_param>
+
+    <att_ctrl_param>
+        <k1>[5, 5, 5]</k1>
+        <k2>[8., 8., 20.]</k2>
+        <k3>[1., 1., 1.5]</k3>
+        <k4>[0.05, 0.05, 0.05]</k4>
+        <k5>[5, 5, 5]</k5>
+<!--        <alpha1>[1.2, 1.2, 1.5]</alpha1>-->
+<!--        <alpha2>[1.2, 1.2, 1.5]</alpha2>-->
+        <alpha1>[1.01, 1.01, 1.01]</alpha1>
+        <alpha2>[1.01, 1.01, 1.01]</alpha2>
+        <dim>3</dim>
+        <dt>0.01</dt>
+    </att_ctrl_param>
+
+    <pos_ctrl_param>
+        <k1>[8, 8, 4]</k1>
+        <k2>[0.3, 0.3, 1.0]</k2>
+        <k3>[0.5, 0.5, 1]</k3>
+        <k4>[0.05, 0.05, 0.05]</k4>
+        <k5>[6, 6, 6]</k5>
+        <alpha1>[1.8, 1.8, 1.8]</alpha1>
+        <alpha2>[1.01, 1.01, 1.01]</alpha2>
+        <dim>3</dim>
+        <dt>0.01</dt>
+    </pos_ctrl_param>
+
+    <att_observer>
+        <use_freq>1</use_freq>
+        <omega>[3.5, 3.4, 10]</omega>
+        <dim>3</dim>
+        <use_freq>1</use_freq>
+        <thresh>[0.5, 0.5, 0.5]</thresh>
+        <dt>0.01</dt>
+    </att_observer>
+
+    <pos_observer>
+        <use_freq>1</use_freq>
+        <omega>[4, 4, 4]</omega>
+        <dim>3</dim>
+        <use_freq>1</use_freq>
+        <thresh>[0.5, 0.5, 0.5]</thresh>
+        <dt>0.01</dt>
+    </pos_observer>
+
+    <ref_trajectory>
+        <ref_amplitude>[2, 2, 1, np.pi / 2]</ref_amplitude>     <!-- x y z psi -->
+<!--        <ref_amplitude>[0, 0, 0, 0]</ref_amplitude>     &lt;!&ndash; x y z psi &ndash;&gt;-->
+        <ref_period>[5, 5, 4, 5]</ref_period>
+        <ref_bias_a>[0, 0, 1.0, 0]</ref_bias_a>
+        <ref_bias_phase>[np.pi / 2, 0, 0, 0]</ref_bias_phase>
+    </ref_trajectory>
+
+</global_initialization>
