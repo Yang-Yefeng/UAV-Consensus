@@ -1,5 +1,4 @@
 import os
-
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -77,11 +76,11 @@ class data_collector:
 
         self.d_in = observeData[:, 1:4]
         self.d_in_obs = observeData[:, 4:7]
-        self.d_in_e_1st = observeData[7:10]
+        self.d_in_e_1st = observeData[:, 7:10]
 
-        self.d_out = observeData[10:13]
-        self.d_out_obs = observeData[13:16]
-        self.d_out_e_1st = observeData[16:19]
+        self.d_out = observeData[:, 10:13]
+        self.d_out_obs = observeData[:, 13:16]
+        self.d_out_e_1st = observeData[:, 16:19]
 
         self.state = uav_stateData[:, 1: 13]
 
@@ -255,6 +254,7 @@ class data_collector:
     def plot_outer_obs(self):
         plt.figure()
         plt.subplot(1, 3, 1)
+        print(self.t.shape, self.d_out.shape)
         plt.plot(self.t, self.d_out[:, 0], 'red')
         plt.plot(self.t, self.d_out_obs[:, 0], 'blue')
         plt.grid(True)
@@ -278,24 +278,24 @@ class data_collector:
         # plt.ylim((-4, 4))
         plt.title('observe dz')
 
-        plt.figure()
-        plt.subplot(1, 3, 1)
-        plt.plot(self.t, self.d_out_e_1st[:, 0], 'red')
-        plt.grid(True)
-        plt.xlabel('time(s)')
-        # plt.ylim((-4, 4))
-        plt.title('1st_error dx')
-
-        plt.subplot(1, 3, 2)
-        plt.plot(self.t, self.d_out_e_1st[:, 1], 'red')
-        plt.grid(True)
-        plt.xlabel('time(s)')
-        # plt.ylim((-4, 4))
-        plt.title('1st_error dy')
-
-        plt.subplot(1, 3, 3)
-        plt.plot(self.t, self.d_out_e_1st[:, 2], 'red')
-        plt.grid(True)
-        plt.xlabel('time(s)')
-        # plt.ylim((-4, 4))
-        plt.title('1st_error dz')
+        # plt.figure()
+        # plt.subplot(1, 3, 1)
+        # plt.plot(self.t, self.d_out_e_1st[:, 0], 'red')
+        # plt.grid(True)
+        # plt.xlabel('time(s)')
+        # # plt.ylim((-4, 4))
+        # plt.title('1st_error dx')
+        #
+        # plt.subplot(1, 3, 2)
+        # plt.plot(self.t, self.d_out_e_1st[:, 1], 'red')
+        # plt.grid(True)
+        # plt.xlabel('time(s)')
+        # # plt.ylim((-4, 4))
+        # plt.title('1st_error dy')
+        #
+        # plt.subplot(1, 3, 3)
+        # plt.plot(self.t, self.d_out_e_1st[:, 2], 'red')
+        # plt.grid(True)
+        # plt.xlabel('time(s)')
+        # # plt.ylim((-4, 4))
+        # plt.title('1st_error dz')

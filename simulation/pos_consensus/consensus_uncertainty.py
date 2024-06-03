@@ -67,7 +67,7 @@ def generate_uncertainty2(time: float, is_ideal: bool = False) -> np.ndarray:
 			phi0 = np.pi / 2
 			Fdx = 0.5 * np.sin(np.cos(2 * w) * time + phi0) - 1.0 * np.cos(3 * np.sin(w) * time + phi0)
 			Fdy = 1.5 * np.sign(np.round(time - 10) % 3 - 1.5) + 0.5 * np.sin(2 * w * time + phi0) - 0.4 * (time - 10)
-			Fdz = 0.5 * np.cos(0.5 * w * time + phi0) - 1.0 * np.sin(3 * w + time + phi0) + 1.0 * (time - 10) ** 2
+			Fdz = 0.5 * np.cos(0.5 * w * time + phi0) - 1.0 * np.sin(3 * w + time + phi0)
 
 			dp = 0.5 * np.sin(np.sin(2 * w) * time + phi0) + 0.2 * np.cos(w * time + phi0)
 			dq = 1.5 * np.cos(w * time + phi0) + 0.2 * np.sin(w * time + phi0) - 0.7
@@ -94,7 +94,7 @@ def generate_uncertainty3(time: float, is_ideal: bool = False) -> np.ndarray:
 			phi0 = np.pi / 2
 			Fdx = 0.5 * np.sin(np.cos(2 * w) * time + phi0) - 1.0 * np.cos(3 * np.sin(w) * time + phi0)
 			Fdy = - 1.0 * np.sqrt(time - 10)
-			Fdz = 0.5 * np.cos(0.5 * w * time + phi0) - 1.0 * np.sin(3 * w + time + phi0) + 1.0 * (time - 10) ** 2
+			Fdz = 0.5 * np.cos(0.5 * w * time + phi0) - 1.0 * np.sin(3 * w + time + phi0) + 1.0 * np.sqrt(time - 10)
 
 			dp = 0.5 * np.sin(np.sin(2 * w) * time + phi0) + 0.2 * np.cos(w * time + phi0)
 			dq = 1.5 * np.cos(w * time + phi0) + 0.2 * np.sin(w * time + phi0) - 0.7
@@ -121,7 +121,7 @@ def generate_uncertainty4(time: float, is_ideal: bool = False) -> np.ndarray:
 			phi0 = 0.
 			Fdx = 1.5
 			Fdy = 0.4 * (time - 5.0)
-			Fdz = -0.6 * (time - 5) ** 2
+			Fdz = -0.6
 
 			dp = 0.5 * np.sin(w * time + phi0) + 0.2 * np.cos(2 * np.sin(2 * w) * time + phi0)
 			dq = 0.5 * np.cos(1.5 * np.sin(2 * w) * time + phi0) + 0.2 * np.sin(w * time + phi0)
@@ -152,5 +152,6 @@ def consensus_uncertainty_N(is_ideal: bool = False, dt: float = 0.001, tm: float
 	i = 0
 	while t < tm - dt / 2:
 		res[i] = consensus_uncertainty(t, is_ideal)
+		i += 1
 		t += dt
 	return res

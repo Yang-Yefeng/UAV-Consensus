@@ -11,7 +11,7 @@ from utils.collector import data_collector
 if __name__ == '__main__':
     uav_num = 4
     cur_path = os.path.dirname(os.path.abspath(__file__))
-    dir_name = cur_path + '/pos_consensus-2024-06-02-11-16-58/'  # select the directory
+    dir_name = cur_path + '/pos_consensus-2024-06-03-12-35-21/'  # select the directory
     data_record = []
     for i in range(uav_num):
         temp = data_collector(0)
@@ -21,6 +21,7 @@ if __name__ == '__main__':
     index = 3
     data_record[index].plot_pos()
     data_record[index].plot_att()
+    data_record[index].plot_outer_obs()
     # data_record[index].plot_torque()
     # data_record[index].plot_throttle()
     # data_record[0].plot_inner_obs()

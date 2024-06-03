@@ -76,13 +76,4 @@
         <thresh>[0.5, 0.5, 0.5]</thresh>
         <dt>0.01</dt>
     </pos_observer>
-
-    <ref_trajectory>
-        <ref_amplitude>[2, 2, 1, np.pi / 2]</ref_amplitude>     <!-- x y z psi -->
-<!--        <ref_amplitude>[0, 0, 0, 0]</ref_amplitude>     &lt;!&ndash; x y z psi &ndash;&gt;-->
-        <ref_period>[5, 5, 4, 5]</ref_period>
-        <ref_bias_a>[0, 0, 1.0, 0]</ref_bias_a>
-        <ref_bias_phase>[np.pi / 2, 0, 0, 0]</ref_bias_phase>
-    </ref_trajectory>
-
 </global_initialization>
