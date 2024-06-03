@@ -49,18 +49,41 @@ pos_ctrl_param = get_pos_ctrl_parma_from_XML(config_root)
 pos_ctrl_param.dt = g_v['dt']
 
 '''global center trajectory and offset'''
-ref_amplitude = np.array([2, 2, 1, np.pi / 2])  # x y z psi
+############### 第一组 ###############
+# ref_amplitude = np.array([1, 1, 0.5, np.pi / 2])  # x y z psi
+# ref_period = np.array([5, 5, 4, 5])
+# ref_bias_a = np.array([0, 0, 1.0, 0])
+# ref_bias_phase = np.array([np.pi / 2, 0, 0, 0])
+#
+# offset_amplitude = np.array([[0., 0., 0.], [0., 0., 0.], [0., 0., 0.], [0., 0., 0.]])
+# offset_period = np.array([[5, 5, 4], [5, 5, 4], [5, 5, 4], [5, 5, 4]])
+# offset_bias_a = np.array([[0.5, 0, 0], [0, 0.5, 0], [-0.5, 0., 0.], [0., -0.5, 0.]])
+# offset_bias_phase = np.array([[0., 0., 0.], [0., 0., 0.],[0., 0., 0.],[0., 0., 0.]])
+############### 第一组 ###############
+
+############### 第二组 ###############
 # ref_amplitude = np.array([0, 0, 0, 0])  # x y z psi
-ref_period = np.array([5, 5, 4, 5])
+# ref_period = np.array([5, 5, 4, 5])
+# ref_bias_a = np.array([0, 0, 1.0, 0])
+# ref_bias_phase = np.array([np.pi / 2, 0, 0, 0])
+#
+# offset_amplitude = np.array([[0., 0., 0.], [0., 0., 0.], [0., 0., 0.], [0., 0., 0.]])
+# offset_period = np.array([[5, 5, 4], [5, 5, 4], [5, 5, 4], [5, 5, 4]])
+# offset_bias_a = np.array([[0.5, 0, 0], [0, 0.5, 0], [-0.5, 0., 0.], [0., -0.5, 0.]])
+# offset_bias_phase = np.array([[0., 0., 0.], [0., 0., 0.],[0., 0., 0.],[0., 0., 0.]])
+############### 第二组 ###############
+
+############### 第三组 ###############
+ref_amplitude = np.array([1, 1, 0.5, np.pi / 2])  # x y z psi
+ref_period = np.array([10, 10, 8, 10])
 ref_bias_a = np.array([0, 0, 1.0, 0])
 ref_bias_phase = np.array([np.pi / 2, 0, 0, 0])
 
-r = 0.5
-nu = np.array([[r, 0, 0],
-			   [0., r, 0.],
-			   [-r, 0., 0.],
-			   [0., -r, 0.]]).astype(float)
-dot_nu = np.zeros((g_v['uav_num'], 3))
+offset_amplitude = np.array([[0.5, 0.5, 0.], [0.5, 0.5, 0.], [0.5, 0.5, 0.], [0.5, 0.5, 0.]])
+offset_period = np.array([[5, 5, 4], [5, 5, 4], [5, 5, 4], [5, 5, 4]])
+offset_bias_a = np.array([[0., 0., 0], [0., 0., 0], [0., 0., 0.], [0., 0., 0.]])
+offset_bias_phase = np.array([[np.pi / 2, 0., 0.], [np.pi, np.pi / 2, 0.],[-np.pi / 2, np.pi, 0.], [0., -np.pi / 2, 0.]])
+############### 第三组 ###############
 '''global center trajectory and offset'''
 
 '''uav group initialization'''
@@ -90,9 +113,6 @@ for i in range(g_v['uav_num']):
 	uavs.append(uav)
 '''uav group initialization'''
 
-def update_nu_dot_nu(time: float):
-	return nu, dot_nu
-
 
 def cal_g_eta_dot_eta():
 	_res = np.zeros((g_v['uav_num'], 3))
@@ -118,7 +138,8 @@ if __name__ == '__main__':
 			'''2.1 generate reference command, uncertainty, and bias for each uav'''
 			dis_i = consensus_un[g_v['g_N'], 6 * i: 6 * (i + 1)]
 			ref, dot_ref, _, _ = ref_uav(g_v['g_t'], ref_amplitude, ref_period, ref_bias_a, ref_bias_phase)
-			nu, dot_nu = update_nu_dot_nu(g_v['g_t'])  # 更新各个无人机的偏移量
+			nu, dot_nu = offset_uavs(g_v['g_t'], offset_amplitude, offset_period, offset_bias_a, offset_bias_phase)	# 更新各个无人机的偏移量
+			# nu, dot_nu = update_nu_dot_nu(g_v['g_t'])
 
 			eta_d_i = ref[0: 3]  # eta 表示外环，d表示参考，i表示无人机编号
 			dot_eta_d_i = dot_ref[0: 3]  # dot 表示一阶导数，eta表示外环，d表示参考，i表示无人机编号
@@ -217,10 +238,10 @@ if __name__ == '__main__':
 		for _uav in uavs:
 			data_block.append(_uav.data_record)
 		plot_consensus_pos(data_block)
-		plot_consensus_vel(data_block)
+		# plot_consensus_vel(data_block)
 		plot_consensus_att(data_block)
-		plot_consensus_throttle(data_block)
-		plot_consensus_torque(data_block)
+		# plot_consensus_throttle(data_block)
+		# plot_consensus_torque(data_block)
 		plot_consensus_outer_obs(data_block)
 	plt.show()
 

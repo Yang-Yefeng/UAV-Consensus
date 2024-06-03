@@ -35,23 +35,28 @@ def ref_uav(time: float, amplitude: np.ndarray, period: np.ndarray, bias_a: np.n
                         [dot2_x_d, dot2_y_d, dot2_z_d, dot2_yaw_d]
                         [dot3_x_d, dot3_y_d, dot3_z_d, dot3_yaw_d]
     """
-    # _r = np.zeros_like(amplitude)
-    # _dr = np.zeros_like(amplitude)
-    # _ddr = np.zeros_like(amplitude)
-    # _dddr = np.zeros_like(amplitude)
-    # if time <= 5.0:
     w = 2 * np.pi / period
     _r = amplitude * np.sin(w * time + bias_phase) + bias_a
     _dr = amplitude * w * np.cos(w * time + bias_phase)
     _ddr = -amplitude * w ** 2 * np.sin(w * time + bias_phase)
     _dddr = -amplitude * w ** 3 * np.cos(w * time + bias_phase)
-    # elif 5.0 < time <= 10.0:
-    #     pass
-    # elif 10.0<time<=15:
-    #     pass
-    # else:
-    #     _r=np.ones_like(amplitude)
     return _r, _dr, _ddr, _dddr
+
+
+def offset_uavs(time: float, amplitude: np.ndarray, period: np.ndarray, bias_a: np.ndarray, bias_phase: np.ndarray):
+    """
+    :param time:
+    :param amplitude:
+    :param period:
+    :param bias_a:
+    :param bias_phase:
+    :return:
+    """
+    '''所有参数，除了时间之外，都是二维的 numpy，每一行表示一个无人机，行里面的每一列分别表示 x y z'''
+    w = 2 * np.pi / period
+    _off = amplitude * np.sin(w * time + bias_phase) + bias_a
+    _doff = amplitude * w * np.cos(w * time + bias_phase)
+    return _off, _doff
 
 
 def generate_uncertainty(time: float, is_ideal: bool = False) -> np.ndarray:

@@ -5,7 +5,7 @@
         <dt>0.01</dt>                   <!--global sampling period-->
         <g_t>0.</g_t>                   <!--global time-->
         <g_N>0</g_N>                    <!--global index-->
-        <g_tm>20</g_tm>                 <!--global maximum simulation time-->
+        <g_tm>30</g_tm>                 <!--global maximum simulation time-->
         <g_ideal>0</g_ideal>            <!--global ideal-->
         <g_obs_in>'rd3'</g_obs_in>      <!--inner-loop observer-->
         <g_obs_out>'rd3'</g_obs_out>    <!--outer-loop observer-->
@@ -13,6 +13,9 @@
         <g_A>[[0, 0, 0, 0], [1, 0, 0, 0], [1, 0, 0, 0], [1, 0, 0, 0]]</g_A>     <!-- adjacent matrix -->
         <g_D>[0, 1, 1, 1]</g_D>         <!--in-degree-->
         <g_B>[1, 0, 0, 0]</g_B>         <!--communication-->
+<!--        <g_A>[[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]]</g_A>     &lt;!&ndash; adjacent matrix &ndash;&gt;-->
+<!--        <g_D>[0, 0, 0, 0]</g_D>         &lt;!&ndash;in-degree&ndash;&gt;-->
+<!--        <g_B>[1, 1, 1, 1]</g_B>         &lt;!&ndash;communication&ndash;&gt;-->
     </global_variable>
 
     <uav_param>
@@ -58,6 +61,13 @@
         <dim>3</dim>
         <dt>0.01</dt>
     </pos_ctrl_param>
+
+    <ref_trajectory>
+        <ref_amplitude>[1, 1, 0.5, np.pi / 2]</ref_amplitude> <!-- 参考轨迹振幅 -->
+        <ref_period>[5, 5, 4, 5]</ref_period>                 <!-- 参考轨迹周期 -->
+        <ref_bias_a>[0, 0, 1.0, 0]</ref_bias_a>               <!-- 参考轨迹幅值偏置 -->
+        <ref_bias_phase>[np.pi / 2, 0, 0, 0]</ref_bias_phase> <!-- 参考轨迹相位偏置 -->
+    </ref_trajectory>
 
     <att_observer>
         <use_freq>1</use_freq>
