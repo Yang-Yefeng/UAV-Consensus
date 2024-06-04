@@ -98,10 +98,4 @@ def generate_uncertainty(time: float, is_ideal: bool = False) -> np.ndarray:
             dq = 1.5 * np.cos(w * time + phi0) + 0.2 * np.sin(w * time + phi0) - 0.7
             dr = 0.5 * np.cos(2 * w * time + phi0) + 0.6 * np.sin(w * time + phi0)
 
-        # Fdx = 0.5 * np.sin(0.8 * np.pi * time) + 0.2 * np.cos(0.4 * np.pi * time)
-        # Fdy = 0.5 * np.cos(0.8 * np.pi * time) + 0.2 * np.sin(0.4 * np.pi * time)
-        # Fdz = 0.5 * np.sin(0.8 * np.pi * time) + 0.2 * np.cos(0.4 * np.pi * time)
-        # dp = 0.5 * np.sin(0.4 * np.pi * time) + 0.2 * np.cos(0.8 * np.pi * time)
-        # dq = 0.5 * np.cos(0.4 * np.pi * time) + 0.2 * np.sin(0.8 * np.pi * time)
-        # dr = 0.5 * np.cos(0.4 * np.pi * time) + 0.2 * np.sin(0.8 * np.pi * time)
         return np.array([Fdx, Fdy, Fdz, dp, dq, dr])

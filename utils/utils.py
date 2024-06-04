@@ -136,8 +136,8 @@ def plot_consensus_pos(data_block: list):
 		plt.plot(data_block[i].t, data_block[i].ref_pos[:, 0], 'red')
 		plt.plot(data_block[i].t, data_block[i].state[:, 0], 'blue')
 		plt.grid(True)
-		plt.ylim((-2, 2))
-		plt.yticks(np.arange(-2, 2, 1))
+		# plt.ylim((-2, 2))
+		# plt.yticks(np.arange(-2, 2, 1))
 		if i == num - 1:
 			plt.xlabel('time(s)')
 		if i == 0:
@@ -147,8 +147,8 @@ def plot_consensus_pos(data_block: list):
 		plt.plot(data_block[i].t, data_block[i].ref_pos[:, 1], 'red')
 		plt.plot(data_block[i].t, data_block[i].state[:, 1], 'blue')
 		plt.grid(True)
-		plt.ylim((-2, 2))
-		plt.yticks(np.arange(-2, 2, 1))
+		# plt.ylim((-2, 2))
+		# plt.yticks(np.arange(-2, 2, 1))
 		if i == num - 1:
 			plt.xlabel('time(s)')
 		if i == 0:
@@ -158,8 +158,8 @@ def plot_consensus_pos(data_block: list):
 		plt.plot(data_block[i].t, data_block[i].ref_pos[:, 2], 'red')
 		plt.plot(data_block[i].t, data_block[i].state[:, 2], 'blue')
 		plt.grid(True)
-		plt.ylim((-2, 2))
-		plt.yticks(np.arange(-2, 2, 1))
+		# plt.ylim((-2, 2))
+		# plt.yticks(np.arange(-2, 2, 1))
 		if i == num - 1:
 			plt.xlabel('time(s)')
 		if i == 0:
