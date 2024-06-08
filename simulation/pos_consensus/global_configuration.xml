@@ -6,16 +6,25 @@
         <g_t>0.</g_t>                   <!--global time-->
         <g_N>0</g_N>                    <!--global index-->
         <g_tm>20</g_tm>                 <!--global maximum simulation time-->
-        <g_ideal>0</g_ideal>            <!--global ideal-->
+        <g_ideal>1</g_ideal>            <!--global ideal-->
         <g_obs_in>'rd3'</g_obs_in>      <!--inner-loop observer-->
         <g_obs_out>'rd3'</g_obs_out>    <!--outer-loop observer-->
         <uav_num>4</uav_num>            <!--number of UAV-->
+
         <g_A>[[0, 0, 0, 0], [1, 0, 0, 0], [1, 0, 0, 0], [1, 0, 0, 0]]</g_A>     <!-- adjacent matrix -->
         <g_D>[0, 1, 1, 1]</g_D>         <!--in-degree-->
         <g_B>[1, 0, 0, 0]</g_B>         <!--communication-->
+
 <!--        <g_A>[[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]]</g_A>     &lt;!&ndash; adjacent matrix &ndash;&gt;-->
 <!--        <g_D>[0, 0, 0, 0]</g_D>         &lt;!&ndash;in-degree&ndash;&gt;-->
 <!--        <g_B>[1, 1, 1, 1]</g_B>         &lt;!&ndash;communication&ndash;&gt;-->
+
+<!--        <g_A>[[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]]</g_A>     &lt;!&ndash; adjacent matrix &ndash;&gt;-->
+<!--        <g_D>[0, 0, 0, 0]</g_D>         &lt;!&ndash;in-degree&ndash;&gt;-->
+<!--        <g_B>[1, 1, 1, 1]</g_B>         &lt;!&ndash;communication&ndash;&gt;-->
+<!--        <g_A>[[0, 1, 1, 1], [1, 0, 0, 0], [1, 0, 0, 0], [1, 0, 0, 0]]</g_A>     &lt;!&ndash; adjacent matrix &ndash;&gt;-->
+<!--        <g_D>[3, 1, 1, 1]</g_D>         &lt;!&ndash;in-degree&ndash;&gt;-->
+<!--        <g_B>[1, 0, 0, 0]</g_B>         &lt;!&ndash;communication&ndash;&gt;-->
     </global_variable>
 
     <uav_param>
@@ -37,13 +46,10 @@
     </uav_param>
 
     <att_ctrl_param>
-        <k1>[5, 5, 5]</k1>
-        <k2>[8., 8., 20.]</k2>
-        <k3>[1., 1., 1.5]</k3>
-        <k4>[0.05, 0.05, 0.05]</k4>
-        <k5>[5, 5, 5]</k5>
-<!--        <alpha1>[1.2, 1.2, 1.5]</alpha1>-->
-<!--        <alpha2>[1.2, 1.2, 1.5]</alpha2>-->
+        <k1>[4., 4., 15.]</k1>
+        <k2>[1., 1., 1.5]</k2>
+        <k3>[0.05, 0.05, 0.05]</k3>
+        <k4>[5, 4, 5]</k4>
         <alpha1>[1.01, 1.01, 1.01]</alpha1>
         <alpha2>[1.01, 1.01, 1.01]</alpha2>
         <dim>3</dim>
@@ -51,11 +57,10 @@
     </att_ctrl_param>
 
     <pos_ctrl_param>
-        <k1>[8, 8, 4]</k1>
-        <k2>[0.3, 0.3, 1.0]</k2>
-        <k3>[0.5, 0.5, 1]</k3>
-        <k4>[0.05, 0.05, 0.05]</k4>
-        <k5>[6, 6, 6]</k5>
+        <k1>[0.3, 0.3, 1.0]</k1>
+        <k2>[0.5, 0.5, 1]</k2>
+        <k3>[0.05, 0.05, 0.05]</k3>
+        <k4>[6, 6, 6]</k4>
         <alpha1>[1.8, 1.8, 1.8]</alpha1>
         <alpha2>[1.01, 1.01, 1.01]</alpha2>
         <dim>3</dim>
