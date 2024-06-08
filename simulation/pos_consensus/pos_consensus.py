@@ -11,6 +11,7 @@ import numpy as np
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/../../../")
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/../../")
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/../")
+print('dddddddddddddddddddddd')
 
 from observer.RobustDifferentatior_3rd import robust_differentiator_3rd as rd3
 # from controller.BS_FNTSMC import bs_fntsmc_param
