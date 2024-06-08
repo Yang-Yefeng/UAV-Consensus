@@ -20,9 +20,10 @@ file = './simulation/pos_consensus/global_configuration.xml'
 # tag_value = XML_GetTagValue(global_variable)
 # print(tag_value)
 # print(tag_value['dt'], type(tag_value['dt']))
-s = '[[0, 0, 0, 0], [1, 0, 0, 0], [1, 0, 0, 0], [1, 0, 0, 0]]'
-J = '[4.212e-3, 4.212e-3, 8.255e-3]'
-res1 = split_str_2_2d_numpy(s,4)
-print(res1)
-res2 = split_str_2_1d_numpy(J)
+# s = '[[0, 0, 0, 0], [1, 0, 0, 0], [1, 0, 0, 0], [1, 0, 0, 0]]'
+# J = '[4.212e-3, 4.212e-3, 8.255e-3]'
+# res1 = split_str_2_2d_numpy(s,4)
+# print(res1)
+# res2 = split_str_2_1d_numpy(J)
+res2 = np.squeeze(np.array([[2], [1], [2], [3]])).flatten()
 print(res2)

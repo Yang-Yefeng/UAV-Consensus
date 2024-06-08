@@ -35,7 +35,7 @@ uav_par = get_uav_param_from_XML(config_root)
 uav_par['dt'] = g_v['dt']  # 仅仅是为了防止采样周期不一样，全部以global variable为准
 uav_par['g_tm'] = g_v['g_tm']  # 仅仅是为了防止采样周期不一样，全部以global variable为准
 uav_par = uav_param(from_dict=uav_par)
-att_ctrl_param = get_att_ctrl_parma_from_XML(config_root)
+att_ctrl_param = get_att_ctrl_param_from_XML(config_root)
 att_ctrl_param.dt = g_v['dt']
 '''
 对于控制器参数调节:
@@ -46,12 +46,12 @@ att_ctrl_param.dt = g_v['dt']
 5. k4 是观测器补偿用的，实际上观测的都很好，所以 k4 要大于0，但是非常小
 6. k5-alpha2 的组合要比 k3-alpha1 大，但是也别太大
 '''
-pos_ctrl_param = get_pos_ctrl_parma_from_XML(config_root)
+pos_ctrl_param = get_pos_ctrl_param_from_XML(config_root)
 pos_ctrl_param.dt = g_v['dt']
 
 '''global center trajectory and offset'''
-# 第一组
-# ref_amplitude = np.array([1, 1, 0.5, np.pi / 2])  # x y z psi
+# 第一组 大圈逆时针，小圈不动
+# ref_amplitude = np.array([1, 1, 0., np.pi / 2])  # x y z psi
 # ref_period = np.array([5, 5, 4, 5])
 # ref_bias_a = np.array([0, 0, 1.0, 0])
 # ref_bias_phase = np.array([np.pi / 2, 0, 0, 0])
@@ -62,28 +62,28 @@ pos_ctrl_param.dt = g_v['dt']
 # offset_bias_phase = np.array([[0., 0., 0.], [0., 0., 0.], [0., 0., 0.], [0., 0., 0.]])
 # 第一组
 
-# 第二组
-# ref_amplitude = np.array([0, 0, 0, 0])  # x y z psi
-# ref_period = np.array([5, 5, 4, 5])
-# ref_bias_a = np.array([2, 2, 1.0, 0])
-# ref_bias_phase = np.array([np.pi / 2, 0, 0, 0])
-#
-# offset_amplitude = np.array([[0., 0., 0.], [0., 0., 0.], [0., 0., 0.], [0., 0., 0.]])
-# offset_period = np.array([[5, 5, 4], [5, 5, 4], [5, 5, 4], [5, 5, 4]])
-# offset_bias_a = np.array([[0.5, 0, 0], [0, 0.5, 0], [-0.5, 0., 0.], [0., -0.5, 0.]])
-# offset_bias_phase = np.array([[0., 0., 0.], [0., 0., 0.],[0., 0., 0.],[0., 0., 0.]])
-# 第二组
-
-# 第三组
-ref_amplitude = np.array([1, 1, 0.5, np.pi / 2])  # x y z psi
-ref_period = np.array([10, 10, 8, 10])
-ref_bias_a = np.array([0, 0, 1.0, 0])
+# 第二组 整体平移，小圈不动
+ref_amplitude = np.array([0, 0, 0, 0])  # x y z psi
+ref_period = np.array([5, 5, 4, 5])
+ref_bias_a = np.array([2, 2, 1.0, 0])
 ref_bias_phase = np.array([np.pi / 2, 0, 0, 0])
 
-offset_amplitude = np.array([[0.5, 0.5, 0.], [0.5, 0.5, 0.], [0.5, 0.5, 0.], [0.5, 0.5, 0.]])
+offset_amplitude = np.array([[0., 0., 0.], [0., 0., 0.], [0., 0., 0.], [0., 0., 0.]])
 offset_period = np.array([[5, 5, 4], [5, 5, 4], [5, 5, 4], [5, 5, 4]])
-offset_bias_a = np.array([[0., 0., 0], [0., 0., 0], [0., 0., 0.], [0., 0., 0.]])
-offset_bias_phase = np.array([[np.pi / 2, 0., 0.], [np.pi, np.pi / 2, 0.],[-np.pi / 2, np.pi, 0.], [0., -np.pi / 2, 0.]])
+offset_bias_a = np.array([[0.5, 0, 0], [0, 0.5, 0], [-0.5, 0., 0.], [0., -0.5, 0.]])
+offset_bias_phase = np.array([[0., 0., 0.], [0., 0., 0.],[0., 0., 0.],[0., 0., 0.]])
+# 第二组
+
+# 第三组 大圈逆时针，小圈逆时针
+# ref_amplitude = np.array([1, 1, 0.5, np.pi / 2])  # x y z psi
+# ref_period = np.array([10, 10, 8, 10])
+# ref_bias_a = np.array([0, 0, 1.0, 0])
+# ref_bias_phase = np.array([np.pi / 2, 0, 0, 0])
+#
+# offset_amplitude = np.array([[0.5, 0.5, 0.], [0.5, 0.5, 0.], [0.5, 0.5, 0.], [0.5, 0.5, 0.]])
+# offset_period = np.array([[5, 5, 4], [5, 5, 4], [5, 5, 4], [5, 5, 4]])
+# offset_bias_a = np.array([[0., 0., 0], [0., 0., 0], [0., 0., 0.], [0., 0., 0.]])
+# offset_bias_phase = np.array([[np.pi / 2, 0., 0.], [np.pi, np.pi / 2, 0.],[-np.pi / 2, np.pi, 0.], [0., -np.pi / 2, 0.]])
 # 第三组
 '''global center trajectory and offset'''
 
@@ -91,7 +91,7 @@ offset_bias_phase = np.array([[np.pi / 2, 0., 0.], [np.pi, np.pi / 2, 0.],[-np.p
 uavs = []
 for i in range(g_v['uav_num']):
     obs_in = rd3(use_freq=True,
-                 omega=np.array([3.5, 3.4, 10]),
+                 omega=np.array([3.5, 3.4, 4]),
                  dim=3,
                  thresh=np.array([0.5, 0.5, 0.5]),
                  dt=g_v['dt'])
@@ -138,9 +138,10 @@ if __name__ == '__main__':
         for i in range(g_v['uav_num']):  # 对于每一个无人机
             '''2.1 generate reference command, uncertainty, and bias for each uav'''
             dis_i = consensus_un[g_v['g_N'], 6 * i: 6 * (i + 1)]
-            ref, dot_ref, _, _ = ref_uav(g_v['g_t'], ref_amplitude, ref_period, ref_bias_a, ref_bias_phase)
-            nu, dot_nu = offset_uavs(g_v['g_t'], offset_amplitude, offset_period, offset_bias_a, offset_bias_phase)  # 更新各个无人机的偏移量
-            # nu, dot_nu = update_nu_dot_nu(g_v['g_t'])
+            ref, dot_ref, _ = ref_uav(g_v['g_t'], ref_amplitude, ref_period, ref_bias_a, ref_bias_phase)
+            # ref[2] = ref_bias_a[2] + 0.5 * g_v['g_t']
+            # dot_ref[2] = 0.5
+            nu, dot_nu, _ = offset_uavs(g_v['g_t'], offset_amplitude, offset_period, offset_bias_a, offset_bias_phase)  # 更新各个无人机的偏移量
 
             eta_d_i = ref[0: 3]  # eta 表示外环，d表示参考，i表示无人机编号
             dot_eta_d_i = dot_ref[0: 3]  # dot 表示一阶导数，eta表示外环，d表示参考，i表示无人机编号
@@ -168,7 +169,6 @@ if __name__ == '__main__':
                                                             uavs[i].uav.kt,
                                                             uavs[i].uav.m,
                                                             obs_eta_i)  # 无人机外环控制
-            yyf_acc = uavs[i].ctrl_pos.control_out_consensus
 
             '''2.3 transfer virtual control command to actual throttle, phi_d, and theta_d'''
             phi_d_old = uavs[i].rho_d[0]

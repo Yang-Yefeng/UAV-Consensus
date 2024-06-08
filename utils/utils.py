@@ -61,7 +61,7 @@ def split_str_2_2d_numpy(s: str, step: int):
 
 
 def split_str_2_1d_numpy(s: str):
-	return np.squeeze(split_str_2_2d_numpy(s, 1))
+	return split_str_2_2d_numpy(s, 1).flatten()
 
 
 def get_global_variable_from_XML(root: ET.Element) -> dict:
@@ -98,14 +98,15 @@ def get_uav_param_from_XML(root: ET.Element) -> dict:
 	return tag_value
 
 
-def get_att_ctrl_parma_from_XML(root: ET.Element) -> bs_fntsmc_param:
+def get_att_ctrl_param_from_XML(root: ET.Element, has_k5:bool=True) -> bs_fntsmc_param:
 	_param = bs_fntsmc_param()
 	tag_value = XML_GetTagValue(XML_FindNode('att_ctrl_param', root))
 	_param.k1 = split_str_2_1d_numpy(tag_value['k1'])
 	_param.k2 = split_str_2_1d_numpy(tag_value['k2'])
 	_param.k3 = split_str_2_1d_numpy(tag_value['k3'])
 	_param.k4 = split_str_2_1d_numpy(tag_value['k4'])
-	_param.k5 = split_str_2_1d_numpy(tag_value['k5'])
+	if has_k5:
+		_param.k5 = split_str_2_1d_numpy(tag_value['k5'])
 	_param.alpha1 = split_str_2_1d_numpy(tag_value['alpha1'])
 	_param.alpha2 = split_str_2_1d_numpy(tag_value['alpha2'])
 	_param.dim = int(tag_value['dim'])
@@ -113,14 +114,15 @@ def get_att_ctrl_parma_from_XML(root: ET.Element) -> bs_fntsmc_param:
 	return _param
 
 
-def get_pos_ctrl_parma_from_XML(root: ET.Element) -> bs_fntsmc_param:
+def get_pos_ctrl_param_from_XML(root: ET.Element, has_k5:bool=True) -> bs_fntsmc_param:
 	_param = bs_fntsmc_param()
 	tag_value = XML_GetTagValue(XML_FindNode('pos_ctrl_param', root))
 	_param.k1 = split_str_2_1d_numpy(tag_value['k1'])
 	_param.k2 = split_str_2_1d_numpy(tag_value['k2'])
 	_param.k3 = split_str_2_1d_numpy(tag_value['k3'])
 	_param.k4 = split_str_2_1d_numpy(tag_value['k4'])
-	_param.k5 = split_str_2_1d_numpy(tag_value['k5'])
+	if has_k5:
+		_param.k5 = split_str_2_1d_numpy(tag_value['k5'])
 	_param.alpha1 = split_str_2_1d_numpy(tag_value['alpha1'])
 	_param.alpha2 = split_str_2_1d_numpy(tag_value['alpha2'])
 	_param.dim = int(tag_value['dim'])

@@ -85,7 +85,7 @@ pos_ctrl_param = bs_fntsmc_param(
 )
 '''Parameter list of the position controller'''
 
-IS_IDEAL = True
+IS_IDEAL = False
 OBSERVER_IN = 'rd3'
 OBSERVER_OUT = 'rd3'
 
@@ -106,7 +106,7 @@ if __name__ == '__main__':
     ref_amplitude = np.array([2, 2, 1, np.pi / 2])  # x y z psi
     # ref_amplitude = np.array([0, 0, 0, 0])  # x y z psi
     ref_period = np.array([5, 5, 4, 5])
-    ref_bias_a = np.array([2, 2, 1, 0])
+    ref_bias_a = np.array([2.5, 2, 1, 0])
     ref_bias_phase = np.array([np.pi / 2, 0, 0, 0])
 
     '''data storage initialization'''
@@ -248,8 +248,6 @@ if __name__ == '__main__':
     data_record.plot_pos()
     data_record.plot_throttle()
     data_record.plot_torque()
-    # data_record.plot_inner_obs()
-    # data_record.plot_outer_obs()
-    # data_record.plot_outer_obs()
+    data_record.plot_outer_obs()
     # data_record.plot_inner_obs()
     plt.show()

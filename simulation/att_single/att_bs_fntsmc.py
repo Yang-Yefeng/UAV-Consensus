@@ -7,6 +7,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import platform
 
+sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/../../../")
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/../../")
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/../")
 
@@ -155,9 +156,9 @@ if __name__ == '__main__':
     SAVE = True
     if SAVE:
         if windows:
-            new_path = cur_path + '\\..\\datasave\\att_bs_fntsmc-' + datetime.datetime.strftime(datetime.datetime.now(), '%Y-%m-%d-%H-%M-%S') + '/'
+            new_path = cur_path + '\\..\\..\\datasave\\att_bs_fntsmc-' + datetime.datetime.strftime(datetime.datetime.now(), '%Y-%m-%d-%H-%M-%S') + '/'
         else:
-            new_path = cur_path + '/../datasave/att_bs_fntsmc-' + datetime.datetime.strftime(datetime.datetime.now(), '%Y-%m-%d-%H-%M-%S') + '/'
+            new_path = cur_path + '/../../datasave/att_bs_fntsmc-' + datetime.datetime.strftime(datetime.datetime.now(), '%Y-%m-%d-%H-%M-%S') + '/'
         os.mkdir(new_path)
         data_record.package2file(new_path)
 

@@ -2,104 +2,82 @@ import numpy as np
 
 
 class fntsmc_param:
-    def __init__(self):
-        self.k1: np.ndarray = np.array([1.2, 0.8, 1.5])
-        self.k2: np.ndarray = np.array([0.2, 0.6, 1.5])
-        self.k3: np.ndarray = np.array([0.05, 0.05, 0.05])
-        self.alpha: np.ndarray = np.array([1.2, 1.5, 1.2])
-        self.beta: np.ndarray = np.array([0.3, 0.3, 0.3])
-        self.gamma: np.ndarray = np.array([0.2, 0.2, 0.2])
-        self.lmd: np.ndarray = np.array([2.0, 2.0, 2.0])
-        self.dim: int = 3
-        self.dt: float = 0.01
-        self.ctrl0: np.ndarray = np.array([0., 0., 0.])
-
-    def print_param(self):
-        print('==== PARAM ====')
-        print('k1:     ', self.k1)
-        print('k2:     ', self.k2)
-        print('alpha:  ', self.alpha)
-        print('beta:   ', self.beta)
-        print('gamma:  ', self.gamma)
-        print('lambda: ', self.lmd)
-        print('dim:    ', self.dim)
-        print('dt', self.dt)
-        print('ctrl0:', self.ctrl0)
-        print('==== PARAM ====')
+	def __init__(self,
+				 k1: np.ndarray = np.zeros(3),
+				 k2: np.ndarray = np.zeros(3),
+				 k3: np.ndarray = np.zeros(3),
+				 k4: np.ndarray = np.zeros(3),
+				 alpha1: np.ndarray = 1.01 * np.ones(3),
+				 alpha2: np.ndarray = 1.01 * np.ones(3),
+				 dim: int = 3,
+				 dt: float = 0.01
+				 ):
+		self.k1 = k1
+		self.k2 = k2
+		self.k3 = k3
+		self.k4 = k4
+		self.alpha1 = alpha1
+		self.alpha2 = alpha2
+		self.dim = dim
+		self.dt = dt
 
 
 class fntsmc:
-    def __init__(self,
-                 param: fntsmc_param = None,
-                 k1: np.ndarray = np.array([1.2, 0.8, 1.5]),  # 1.2, 1.5
-                 k2: np.ndarray = np.array([0.2, 0.6, 1.5]),  # 0.2, 0.5
-                 k3: np.ndarray = np.array([0.05, 0.05, 0.05]),
-                 alpha: np.ndarray = np.array([1.2, 1.5, 1.2]),
-                 beta: np.ndarray = np.array([0.3, 0.3, 0.3]),
-                 gamma: np.ndarray = np.array([0.2, 0.2, 0.2]),
-                 lmd: np.ndarray = np.array([2.0, 2.0, 2.0]),
-                 dim: int = 3,
-                 dt: float = 0.001,
-                 ctrl0: np.ndarray = np.array([0., 0., 0.])):
+	def __init__(self,
+				 param: fntsmc_param = None,
+				 k1: np.ndarray = np.array([0.3, 0.3, 1.]),
+				 k2: np.ndarray = np.array([0.5, 0.5, 1.]),
+				 k3: np.ndarray = np.array([0.05, 0.05, 0.05]),
+				 k4: np.ndarray = np.array([6, 6, 6]),
+				 alpha1: np.ndarray = np.array([1.01, 1.01, 1.01]),
+				 alpha2: np.ndarray = np.array([1.01, 1.01, 1.01]),
+				 dim: int = 3,
+				 dt: float = 0.01):
+		self.k1 = k1 if param is None else param.k1
+		self.k2 = k2 if param is None else param.k2
+		self.k3 = k3 if param is None else param.k3
+		self.k4 = k4 if param is None else param.k4
+		self.alpha1 = alpha1 if param is None else param.alpha1
+		self.alpha2 = alpha2 if param is None else param.alpha2
+		self.dt = dt if param is None else param.dt
+		self.dim = dim if param is None else param.dim
+		self.s = np.zeros(self.dim)
+		self.control_in = np.zeros(self.dim)
+		self.control_out = np.zeros(self.dim)
 
-        self.k1 = k1 if param is None else param.k1
-        self.k2 = k2 if param is None else param.k2
-        self.k3 = k3 if param is None else param.k3
-        self.alpha = alpha if param is None else param.alpha
-        self.beta = beta if param is None else param.beta
-        self.gamma = gamma if param is None else param.gamma
-        self.lmd = lmd if param is None else param.lmd
-        self.dt = dt if param is None else param.dt
-        self.dim = dim if param is None else param.dim
+	@staticmethod
+	def sig(x, a, kt=5):
+		return np.fabs(x) ** a * np.tanh(kt * x)
 
-        self.sigma_o = np.zeros(self.dim)
-        self.dot_sigma_o1 = np.zeros(self.dim)
-        self.sigma_o1 = np.zeros(self.dim)
-        self.so = self.sigma_o + lmd * self.sigma_o1
-        # self.ctrl = np.zeros(self.dim)
-        self.control = ctrl0
+	def control_update_inner(self,
+							 e_rho: np.ndarray,
+							 dot_e_rho: np.ndarray,
+							 dd_ref: np.ndarray,
+							 W: np.ndarray,
+							 dW: np.ndarray,
+							 omega: np.ndarray,
+							 A_omega: np.ndarray,
+							 B_omega: np.ndarray,
+							 obs: np.ndarray,
+							 att_only: bool = False):
+		if not att_only:
+			dd_ref = np.zeros(self.dim)
+		self.s = dot_e_rho + self.k1 * e_rho + self.k2 * self.sig(e_rho, self.alpha1)
+		tau1 = np.dot(W, A_omega) + np.dot(dW, omega) - dd_ref
+		tau2 = (self.k1 + self.k2 * self.alpha1 * self.sig(e_rho, self.alpha1 - 1)) * dot_e_rho
+		tau3 = obs + self.k3 * np.tanh(5 * self.s) + self.k4 * self.sig(self.s, self.alpha2)
+		self.control_in = -np.dot(np.linalg.inv(np.dot(W, B_omega)), tau1 + tau2 + tau3)
 
-    def control_update(self, kp: float, m: float, vel: np.ndarray, e: np.ndarray, de: np.ndarray, dd_ref: np.ndarray, obs: np.ndarray):
-        """
-        :param kp:
-        :param m:
-        :param vel:
-        :param e:
-        :param de:
-        :param dd_ref:
-        :param obs:
-        :brief:         输出为 x y z 三轴的虚拟的加速度
-        :return:
-        """
-        k_tanh_e = 5
-        k_tanh_sigma0 = 5
-        self.sigma_o = de + self.k1 * e + self.gamma * np.fabs(e) ** self.alpha * np.tanh(k_tanh_e * e)
-        self.dot_sigma_o1 = np.fabs(self.sigma_o) ** self.beta * np.tanh(k_tanh_sigma0 * self.sigma_o)
-        self.sigma_o1 += self.dot_sigma_o1 * self.dt
-        self.so = self.sigma_o + self.lmd * self.sigma_o1
-
-        uo1 = kp / m * vel + dd_ref - self.k1 * de - self.gamma * self.alpha * np.fabs(e) ** (self.alpha - 1) * de - self.lmd * self.dot_sigma_o1
-        uo2 = -self.k2 * self.so - obs
-
-        self.control = uo1 + uo2
-
-    def control_update2(self,
-                        second_order_att_dynamics: np.ndarray,
-                        control_mat: np.ndarray,
-                        e: np.ndarray,
-                        de: np.ndarray,
-                        dd_ref: np.ndarray,
-                        obs: np.ndarray):
-        k_tanh_e = 5
-        k_tanh_s = 5
-        k_tanh_sigma = 10
-        self.sigma_o = 1 * de + self.k1 * e + self.gamma * np.fabs(e) ** self.alpha * np.tanh(k_tanh_e * e)
-        self.dot_sigma_o1 = np.fabs(self.sigma_o) ** self.beta * np.tanh(k_tanh_s * self.sigma_o)
-        self.sigma_o1 += self.dot_sigma_o1 * self.dt
-        self.sigma = self.sigma_o + self.lmd * self.sigma_o1
-
-        u1 = second_order_att_dynamics + dd_ref + self.k1 * de + self.gamma * self.alpha * np.fabs(e) ** (self.alpha - 1) * de + self.lmd * self.dot_sigma_o1
-        u2 = -self.k2 * np.tanh(k_tanh_sigma * self.sigma) - obs
-        # u2 = -self.k2 * self.sigma
-
-        self.control = -np.dot(np.linalg.inv(control_mat), u1 + u2)
+	def control_update_outer(self,
+							 e_eta: np.ndarray,
+							 dot_e_eta: np.ndarray,
+							 dot_eta: np.ndarray,
+							 kt: float,
+							 m: float,
+							 dd_ref: np.ndarray,
+							 obs: np.ndarray):
+		self.s = dot_e_eta + self.k1 * e_eta + self.k2 * self.sig(e_eta, self.alpha1)
+		u1 = -kt / m * dot_eta - dd_ref
+		u2 = (self.k1 + self.k2 * self.alpha1 * self.sig(e_eta, self.alpha1 - 1)) * dot_e_eta
+		u3 = obs + self.k3 * np.tanh(5 * self.s) + self.k4 * self.sig(self.s, self.alpha2)
+		self.control_out = -(u1 + u2 + u3)
