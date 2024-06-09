@@ -1,6 +1,4 @@
 import sys, os
-import pandas as pd
-import numpy as np
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/../../../")
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/../../")
@@ -8,14 +6,12 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/../")
 
 import mpl_toolkits.mplot3d.axes3d as axes3d
 from matplotlib.pyplot import MultipleLocator
-import matplotlib.pyplot as plt
-from utils.collector import data_collector
 from utils.utils import *
 
 
 if __name__ == '__main__':
     cur_path = os.path.dirname(os.path.abspath(__file__))
-    base_dir = cur_path + '/pos_consensus-2024-06-06-15-13-53/'  # select the directory
+    base_dir = cur_path + '/pos_consensus-2024-06-09-17-53-04/'  # select the directory
     data_record = []
     pos_record = []
     uav_num = len(os.listdir(base_dir))     # check the number of the uav
@@ -33,7 +29,7 @@ if __name__ == '__main__':
 
     fig = plt.figure(figsize=(9, 9))
     ax = axes3d.Axes3D(fig)
-    ax.set_aspect('auto')  # 只能auto
+    ax.set_aspect('auto')
 
     ax.set_xlim3d(xbound)
     ax.set_ylim3d(ybound)

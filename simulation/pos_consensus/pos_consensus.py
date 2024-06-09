@@ -3,10 +3,8 @@ import sys
 import datetime
 import platform
 
-import matplotlib.pyplot as plt
-import numpy as np
-
 # import matplotlib.pyplot as plt
+# import numpy as np
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/../../../")
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/../../")
@@ -136,6 +134,7 @@ if __name__ == '__main__':
 	'''1. generate uncertainty and global reference for all UAVs at all timesteps'''
 	consensus_un = random_uncertainty_n(g_v['uav_num'], g_v['dt'], g_v['g_tm'], g_v['g_ideal'])
 	g_ref, g_dot_ref, g_dot2_ref = ref_uav_sequence(g_v['dt'], g_v['g_tm'], ref_amplitude, ref_period, ref_bias_a, ref_bias_phase)
+	NU, DOT_NU, DOT2_NU = offset_uav_n_sequence(g_v['dt'], g_v['g_tm'], offset_amplitude, offset_period, offset_bias_a, offset_bias_phase)
 	
 	
 	while g_v['g_t'] < g_v['g_tm'] - g_v['dt'] / 2:
@@ -152,12 +151,15 @@ if __name__ == '__main__':
 			print('time: %.2f s.' % (g_v['g_N'] / int(1 / g_v['dt'])))
 		
 		'''2. calculations for each UAV'''
-		ref = g_ref[g_v['g_N']]
-		dot_ref = g_dot_ref[g_v['g_N']]
-		dot2_ref = g_dot2_ref[g_v['g_N']]
+		ref, dot_ref, dot2_ref = g_ref[g_v['g_N']], g_dot_ref[g_v['g_N']], g_dot2_ref[g_v['g_N']]
 		# ref[2] = ref_bias_a[2] + 0.5 * g_v['g_t']
 		# dot_ref[2] = 0.5
-		nu, dot_nu, dot2_nu = offset_uav_n(g_v['g_t'], offset_amplitude, offset_period, offset_bias_a, offset_bias_phase)  # 更新各个无人机的偏移量
+		
+		# nu, dot_nu, dot2_nu = offset_uav_n(g_v['g_t'], offset_amplitude, offset_period, offset_bias_a, offset_bias_phase)  # 更新各个无人机的偏移量
+		nu = NU[g_v['g_N']]
+		dot_nu = DOT_NU[g_v['g_N']]
+		dot2_nu = DOT2_NU[g_v['g_N']]
+		
 		g_eta, g_dot_eta = cal_g_eta_dot_eta()  # 先计算全局状态
 		g_obs, g_2nd_dynamics = cal_g_obs_2nd_dynamic(dot2_nu)
 		
@@ -269,7 +271,7 @@ if __name__ == '__main__':
 		plot_consensus_outer_obs(data_block)
 	plt.show()
 	
-	SAVE = False
+	SAVE = True
 	if SAVE:
 		os.mkdir(new_path)
 		for i in range(g_v['uav_num']):
