@@ -100,7 +100,7 @@ if __name__ == '__main__':
     dot_theta_d = (theta_d - theta_d_old) / uav.dt
     throttle = uav.m * uav.g
 
-    ref, dot_ref, dot2_ref, _ = ref_uav(uav.time, ref_amplitude, ref_period, ref_bias_a, ref_bias_phase)  # 整体参考信号 xd yd zd psid
+    ref, dot_ref, dot2_ref = ref_uav(uav.time, ref_amplitude, ref_period, ref_bias_a, ref_bias_phase)  # 整体参考信号 xd yd zd psid
     rhod = np.array([phi_d, theta_d, ref[3]]).astype(float)  # 内环参考信号 phi_d theta_d psi_d
     dot_rhod = np.array([dot_phi_d, dot_theta_d, dot_ref[3]]).astype(float)  # 内环参考信号导数
 
@@ -137,7 +137,7 @@ if __name__ == '__main__':
             print('time: %.2f s.' % (uav.n / int(1 / uav.dt)))
 
         '''1. generate reference command and uncertainty'''
-        ref, dot_ref, dotdot_ref, _ = ref_uav(uav.time, ref_amplitude, ref_period, ref_bias_a, ref_bias_phase)
+        ref, dot_ref, dotdot_ref = ref_uav(uav.time, ref_amplitude, ref_period, ref_bias_a, ref_bias_phase)
         uncertainty = generate_uncertainty(time=uav.time, is_ideal=IS_IDEAL)
 
         '''2. generate outer-loop reference signal 'eta_d' and its 1st derivatives'''

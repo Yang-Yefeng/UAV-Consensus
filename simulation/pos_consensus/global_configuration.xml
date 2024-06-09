@@ -6,7 +6,7 @@
         <g_t>0.</g_t>                   <!--global time-->
         <g_N>0</g_N>                    <!--global index-->
         <g_tm>20</g_tm>                 <!--global maximum simulation time-->
-        <g_ideal>0</g_ideal>            <!--global ideal-->
+        <g_ideal>1</g_ideal>            <!--global ideal-->
         <g_obs_in>'rd3'</g_obs_in>      <!--inner-loop observer-->
         <g_obs_out>'rd3'</g_obs_out>    <!--outer-loop observer-->
         <uav_num>4</uav_num>            <!--number of UAV-->
