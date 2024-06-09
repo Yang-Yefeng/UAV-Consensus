@@ -43,7 +43,7 @@ def ref_uav(time: float, amplitude: np.ndarray, period: np.ndarray, bias_a: np.n
     return _r, _dr, _ddr
 
 
-def offset_uavs(time: float, amplitude: np.ndarray, period: np.ndarray, bias_a: np.ndarray, bias_phase: np.ndarray):
+def offset_uav_n(time: float, amplitude: np.ndarray, period: np.ndarray, bias_a: np.ndarray, bias_phase: np.ndarray):
     """
     :param time:
     :param amplitude:
@@ -100,3 +100,22 @@ def generate_uncertainty(time: float, is_ideal: bool = False) -> np.ndarray:
             dr = 0.5 * np.cos(2 * w * time + phi0) + 0.6 * np.sin(w * time + phi0)
 
         return np.array([Fdx, Fdy, Fdz, dp, dq, dr])
+
+
+def ref_uav_sequence(dt:float,
+                     tm:float,
+                     amplitude: np.ndarray,
+                     period: np.ndarray,
+                     bias_a: np.ndarray,
+                     bias_phase: np.ndarray):
+    w = 2 * np.pi / period
+    N = int(np.round(tm / dt))
+    _r = np.zeros((N, 4))
+    _dr = np.zeros((N, 4))
+    _ddr = np.zeros((N, 4))
+    for i in range(N):
+        _r[i, :] = amplitude * np.sin(w * i * dt + bias_phase) + bias_a
+        _dr[i, :] = amplitude * w * np.cos(w * i * dt + bias_phase)
+        _ddr[i, :] = -amplitude * w ** 2 * np.sin(w * i * dt + bias_phase)
+    return _r, _dr, _ddr
+

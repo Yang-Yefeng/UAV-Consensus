@@ -50,27 +50,27 @@ pos_ctrl_param.dt = g_v['dt']
 
 '''global center trajectory and offset'''
 # 第一组 大圈逆时针，小圈不动
-# ref_amplitude = np.array([1, 1, 0.5, np.pi / 2])  # x y z psi
-# ref_period = np.array([5, 5, 4, 5])
-# ref_bias_a = np.array([0, 0, 1.0, 0])
-# ref_bias_phase = np.array([np.pi / 2, 0, 0, 0])
-#
-# offset_amplitude = np.array([[0., 0., 0.], [0., 0., 0.], [0., 0., 0.], [0., 0., 0.]])
-# offset_period = np.array([[5, 5, 4], [5, 5, 4], [5, 5, 4], [5, 5, 4]])
-# offset_bias_a = np.array([[0.5, 0, 0], [0, 0.5, 0], [-0.5, 0., 0.], [0., -0.5, 0.]])
-# offset_bias_phase = np.array([[0., 0., 0.], [0., 0., 0.], [0., 0., 0.], [0., 0., 0.]])
-# 第一组
-
-# 第二组 整体平移，小圈不动
-ref_amplitude = np.array([0, 0, 0, 0])  # x y z psi
+ref_amplitude = np.array([1, 1, 0.5, np.pi / 2])  # x y z psi
 ref_period = np.array([5, 5, 4, 5])
-ref_bias_a = np.array([2, 2, 1.0, 0])
+ref_bias_a = np.array([0, 0, 1.0, 0])
 ref_bias_phase = np.array([np.pi / 2, 0, 0, 0])
 
 offset_amplitude = np.array([[0., 0., 0.], [0., 0., 0.], [0., 0., 0.], [0., 0., 0.]])
 offset_period = np.array([[5, 5, 4], [5, 5, 4], [5, 5, 4], [5, 5, 4]])
 offset_bias_a = np.array([[0.5, 0, 0], [0, 0.5, 0], [-0.5, 0., 0.], [0., -0.5, 0.]])
 offset_bias_phase = np.array([[0., 0., 0.], [0., 0., 0.], [0., 0., 0.], [0., 0., 0.]])
+# 第一组
+
+# 第二组 整体平移，小圈不动
+# ref_amplitude = np.array([0, 0, 0, 0])  # x y z psi
+# ref_period = np.array([5, 5, 4, 5])
+# ref_bias_a = np.array([2, 2, 1.0, 0])
+# ref_bias_phase = np.array([np.pi / 2, 0, 0, 0])
+#
+# offset_amplitude = np.array([[0., 0., 0.], [0., 0., 0.], [0., 0., 0.], [0., 0., 0.]])
+# offset_period = np.array([[5, 5, 4], [5, 5, 4], [5, 5, 4], [5, 5, 4]])
+# offset_bias_a = np.array([[0.5, 0, 0], [0, 0.5, 0], [-0.5, 0., 0.], [0., -0.5, 0.]])
+# offset_bias_phase = np.array([[0., 0., 0.], [0., 0., 0.], [0., 0., 0.], [0., 0., 0.]])
 # 第二组
 
 # 第三组 大圈逆时针，小圈逆时针
@@ -133,26 +133,31 @@ def cal_g_obs_2nd_dynamic(g_dd_nu: np.ndarray):
 
 
 if __name__ == '__main__':
-	'''1. generate uncertainty for all UAVs at all timesteps'''
-	consensus_un = consensus_uncertainty_N(is_ideal=g_v['g_ideal'], dt=g_v['dt'], tm=g_v['g_tm'], num_uav=g_v['uav_num'])  # (20000, 24)
+	'''1. generate uncertainty and global reference for all UAVs at all timesteps'''
+	consensus_un = random_uncertainty_n(g_v['uav_num'], g_v['dt'], g_v['g_tm'], g_v['g_ideal'])
+	g_ref, g_dot_ref, g_dot2_ref = ref_uav_sequence(g_v['dt'], g_v['g_tm'], ref_amplitude, ref_period, ref_bias_a, ref_bias_phase)
+	
 	
 	while g_v['g_t'] < g_v['g_tm'] - g_v['dt'] / 2:
 		'''嗨嗨嗨'''
-		# 这个是及其关键的！刚开始的时候，可能e比较大，所以如果采用双向拓扑，那么会有超调
+		# 刚开始的时候，可能e比较大，所以如果采用双向拓扑，那么会有超调
 		# 所以，刚开始几秒中不使用双向拓扑，等到基本没误差，再转化为双向的，美滋滋
-		if g_v['g_t'] > 5.0:
-			uavs[0].adjacency = np.array([0, 1, 1, 1])
-			uavs[0].d = 3
+		# 实际是否使用，可以酌情调试
+		# if g_v['g_t'] > 5.0:
+		# 	uavs[0].adjacency = np.array([0, 1, 1, 1])
+		# 	uavs[0].d = 3
 		'''嗨嗨嗨'''
 		
 		if g_v['g_N'] % int(1 / g_v['dt']) == 0:
 			print('time: %.2f s.' % (g_v['g_N'] / int(1 / g_v['dt'])))
 		
 		'''2. calculations for each UAV'''
-		ref, dot_ref, dot2_ref = ref_uav(g_v['g_t'], ref_amplitude, ref_period, ref_bias_a, ref_bias_phase)
+		ref = g_ref[g_v['g_N']]
+		dot_ref = g_dot_ref[g_v['g_N']]
+		dot2_ref = g_dot2_ref[g_v['g_N']]
 		# ref[2] = ref_bias_a[2] + 0.5 * g_v['g_t']
 		# dot_ref[2] = 0.5
-		nu, dot_nu, dot2_nu = offset_uavs(g_v['g_t'], offset_amplitude, offset_period, offset_bias_a, offset_bias_phase)  # 更新各个无人机的偏移量
+		nu, dot_nu, dot2_nu = offset_uav_n(g_v['g_t'], offset_amplitude, offset_period, offset_bias_a, offset_bias_phase)  # 更新各个无人机的偏移量
 		g_eta, g_dot_eta = cal_g_eta_dot_eta()  # 先计算全局状态
 		g_obs, g_2nd_dynamics = cal_g_obs_2nd_dynamic(dot2_nu)
 		

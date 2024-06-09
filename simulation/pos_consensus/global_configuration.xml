@@ -6,7 +6,7 @@
         <g_t>0.</g_t>                   <!--global time-->
         <g_N>0</g_N>                    <!--global index-->
         <g_tm>20</g_tm>                 <!--global maximum simulation time-->
-        <g_ideal>1</g_ideal>            <!--global ideal-->
+        <g_ideal>0</g_ideal>            <!--global ideal-->
         <g_obs_in>'rd3'</g_obs_in>      <!--inner-loop observer-->
         <g_obs_out>'rd3'</g_obs_out>    <!--outer-loop observer-->
         <uav_num>4</uav_num>            <!--number of UAV-->
@@ -67,28 +67,28 @@
         <dt>0.01</dt>
     </pos_ctrl_param>
 
-    <ref_trajectory>
-        <ref_amplitude>[1, 1, 0.5, np.pi / 2]</ref_amplitude> <!-- 参考轨迹振幅 -->
-        <ref_period>[5, 5, 4, 5]</ref_period>                 <!-- 参考轨迹周期 -->
-        <ref_bias_a>[0, 0, 1.0, 0]</ref_bias_a>               <!-- 参考轨迹幅值偏置 -->
-        <ref_bias_phase>[np.pi / 2, 0, 0, 0]</ref_bias_phase> <!-- 参考轨迹相位偏置 -->
-    </ref_trajectory>
+<!--    <ref_trajectory>-->
+<!--        <ref_amplitude>[1, 1, 0.5, np.pi / 2]</ref_amplitude> &lt;!&ndash; 参考轨迹振幅 &ndash;&gt;-->
+<!--        <ref_period>[5, 5, 4, 5]</ref_period>                 &lt;!&ndash; 参考轨迹周期 &ndash;&gt;-->
+<!--        <ref_bias_a>[0, 0, 1.0, 0]</ref_bias_a>               &lt;!&ndash; 参考轨迹幅值偏置 &ndash;&gt;-->
+<!--        <ref_bias_phase>[np.pi / 2, 0, 0, 0]</ref_bias_phase> &lt;!&ndash; 参考轨迹相位偏置 &ndash;&gt;-->
+<!--    </ref_trajectory>-->
 
-    <att_observer>
-        <use_freq>1</use_freq>
-        <omega>[3.5, 3.4, 10]</omega>
-        <dim>3</dim>
-        <use_freq>1</use_freq>
-        <thresh>[0.5, 0.5, 0.5]</thresh>
-        <dt>0.01</dt>
-    </att_observer>
+<!--    <att_observer>-->
+<!--        <use_freq>1</use_freq>-->
+<!--        <omega>[3.5, 3.4, 10]</omega>-->
+<!--        <dim>3</dim>-->
+<!--        <use_freq>1</use_freq>-->
+<!--        <thresh>[0.5, 0.5, 0.5]</thresh>-->
+<!--        <dt>0.01</dt>-->
+<!--    </att_observer>-->
 
-    <pos_observer>
-        <use_freq>1</use_freq>
-        <omega>[4, 4, 4]</omega>
-        <dim>3</dim>
-        <use_freq>1</use_freq>
-        <thresh>[0.5, 0.5, 0.5]</thresh>
-        <dt>0.01</dt>
-    </pos_observer>
+<!--    <pos_observer>-->
+<!--        <use_freq>1</use_freq>-->
+<!--        <omega>[4, 4, 4]</omega>-->
+<!--        <dim>3</dim>-->
+<!--        <use_freq>1</use_freq>-->
+<!--        <thresh>[0.5, 0.5, 0.5]</thresh>-->
+<!--        <dt>0.01</dt>-->
+<!--    </pos_observer>-->
 </global_initialization>

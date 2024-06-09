@@ -1,5 +1,6 @@
 import numpy as np
 
+
 def generate_uncertainty1(time: float, is_ideal: bool = False) -> np.ndarray:
 	if is_ideal:
 		return np.array([0, 0, 0, 0, 0, 0]).astype(float)
@@ -12,7 +13,7 @@ def generate_uncertainty1(time: float, is_ideal: bool = False) -> np.ndarray:
 			Fdx = 0.5 * np.sin(w * time + phi0) + 0.2 * np.cos(3 * w * time + phi0) + 0.2
 			Fdy = 0.5 * np.cos(w * time + phi0) + 0.2 * np.sin(3 * w * time + phi0) + 0.4
 			Fdz = 0.5 * np.sin(w * time + phi0) + 0.2 * np.cos(3 * w * time + phi0) - 0.5
-
+			
 			dp = 0
 			dq = 0
 			dr = 0.5 * np.cos(w * time + phi0) + 0.2 * np.sin(w * time + phi0)
@@ -20,7 +21,7 @@ def generate_uncertainty1(time: float, is_ideal: bool = False) -> np.ndarray:
 			Fdx = 1.5
 			Fdy = 0.4 * (time - 5.0)
 			Fdz = -0.6
-
+			
 			dp = 0
 			dq = 0
 			dr = 0.5 * np.sign(np.round(time - 5) % 2 - 0.5)
@@ -29,7 +30,7 @@ def generate_uncertainty1(time: float, is_ideal: bool = False) -> np.ndarray:
 			Fdx = 0.5 * np.sin(np.cos(2 * w) * time + phi0) - 1.0 * np.cos(3 * np.sin(w) * time + phi0)
 			Fdy = 0.5 * np.sign(np.round(time - 10) % 3 - 1.5) + 0.5 * np.sin(2 * w * time + phi0) - 0.4
 			Fdz = 0.5 * np.cos(w * time + phi0) - 1.0 * np.sin(3 * w + time + phi0) + 1.0
-
+			
 			dp = 0
 			dq = 0
 			dr = 0.5 * np.cos(2 * w * time + phi0) + 0.6 * np.sin(w * time + phi0)
@@ -47,7 +48,7 @@ def generate_uncertainty2(time: float, is_ideal: bool = False) -> np.ndarray:
 			Fdx = 0.5 * np.sin(2 * w * time + phi0) + 0.2 * np.cos(3 * w * time + phi0) + 0.2
 			Fdy = 0.5 * np.cos(w * time + phi0) + 0.2 * np.sin(3 * w * time + phi0) + 0.4
 			Fdz = 0.5 * np.sin(w * time + phi0) + 0.2 * np.cos(3 * w * time + phi0) - 0.5
-
+			
 			dp = 0
 			dq = 0
 			dr = 0.5 * np.cos(w * time + phi0) + 0.2 * np.sin(w * time + phi0)
@@ -56,7 +57,7 @@ def generate_uncertainty2(time: float, is_ideal: bool = False) -> np.ndarray:
 			Fdx = 0.5 * np.sin(np.cos(2 * w) * time + phi0) - 0.3 * np.cos(3 * np.sin(w) * time + phi0)
 			Fdy = 0.2 * np.sign(np.round(time - 10) % 3 - 1.5) + 0.5 * np.sin(2 * w * time + phi0) - 0.4 * (time - 10)
 			Fdz = 0.5 * np.cos(0.5 * w * time + phi0) - 1.0 * np.sin(3 * w + time + phi0)
-
+			
 			dp = 0
 			dq = 0
 			dr = 0.5 * np.cos(2 * w * time + phi0) + 0.6 * np.sin(w * time + phi0)
@@ -74,7 +75,7 @@ def generate_uncertainty3(time: float, is_ideal: bool = False) -> np.ndarray:
 			Fdx = 0.5 * np.sin(2 * w * time + phi0) + 0.2 * np.cos(3 * w * time + phi0) + 0.2
 			Fdy = 0.5 * np.cos(w * time + phi0) + 0.2 * np.sin(3 * w * time + phi0) + 0.4
 			Fdz = 0.5 * np.sin(w * time + phi0) + 0.2 * np.cos(3 * w * time + phi0) - 0.5
-
+			
 			dp = 0
 			dq = 0
 			dr = 0.5 * np.cos(w * time + phi0) + 0.2 * np.sin(w * time + phi0)
@@ -83,7 +84,7 @@ def generate_uncertainty3(time: float, is_ideal: bool = False) -> np.ndarray:
 			Fdx = 0.5 * np.sin(np.cos(2 * w) * time + phi0) - 0.4 * np.cos(3 * np.sin(w) * time + phi0)
 			Fdy = - 1.0 * np.sqrt(time - 10) / 2
 			Fdz = 0.5 * np.cos(0.5 * w * time + phi0) - 0.3 * np.sin(3 * w + time + phi0) + 1.0 * np.sqrt(time - 10)
-
+			
 			dp = 0
 			dq = 0
 			dr = 0.5 * np.cos(2 * w * time + phi0) + 1.6 * np.sin(w * time + phi0)
@@ -101,7 +102,7 @@ def generate_uncertainty4(time: float, is_ideal: bool = False) -> np.ndarray:
 			Fdx = 0.5 * np.sin(1.5 * w * time + phi0) + 0.2 * np.cos(2 * w * time + phi0) + 1.2
 			Fdy = 1.5 * np.cos(1.5 * w * time + phi0) + 0.4 * np.sin(2 * w * time + phi0) + 0.4
 			Fdz = 0.8 * np.sin(1.5 * w * time + phi0) + 0.7 * np.cos(2 * w * time + phi0) - 0.5
-
+			
 			dp = 0
 			dq = 0
 			dr = 1.0 * np.cos(2 * w * time + phi0) + 0.4 * np.sin(w * time + phi0)
@@ -110,7 +111,7 @@ def generate_uncertainty4(time: float, is_ideal: bool = False) -> np.ndarray:
 			Fdx = 1.5
 			Fdy = 0.4 * (time - 5.0)
 			Fdz = -0.6
-
+			
 			dp = 0
 			dq = 0
 			dr = 0.5
@@ -119,7 +120,7 @@ def generate_uncertainty4(time: float, is_ideal: bool = False) -> np.ndarray:
 			Fdx = 0.5 * np.sin(np.cos(2 * w) * time + phi0) - 1.0 * np.cos(3 * np.sin(w) * time + phi0)
 			Fdy = 0.5 * np.sign(np.round(time - 10) % 2 - 1.0) + 0.8 * np.sin(2 * w * time + phi0) - 0.4
 			Fdz = 0.5 * np.cos(w * time + phi0) - 1.0 * np.sin(3 * w + time + phi0) + 1.0
-
+			
 			dp = 0
 			dq = 0
 			dr = 0.5 * np.cos(2 * w * time + phi0) + 0.6 * np.sin(w * time + phi0)
@@ -143,3 +144,31 @@ def consensus_uncertainty_N(is_ideal: bool = False, dt: float = 0.001, tm: float
 		i += 1
 		t += dt
 	return res
+
+
+def random_uncertainty(dt: float, tm: float, is_ideal: bool = False) -> np.ndarray:
+	N = int(np.round(tm / dt))
+	d = np.zeros((N, 6)).astype(float)
+	if is_ideal:
+		return d
+	else:
+		'''定义干扰的变化基础周期在 T = [2s, 4s]，w = 2pi / T
+		5s 一个新信号
+		'''
+		A_sin = np.random.uniform(0, 1, 6)
+		A_cos = np.random.uniform(0, 1, 6)
+		w_sin = 2 * np.pi / np.random.uniform(2, 4, 6)
+		w_cos = 2 * np.pi / np.random.uniform(2, 4, 6)
+		phi0_sin = np.random.uniform(-np.pi / 2, np.pi / 2, 6)
+		phi0_cos = np.random.uniform(-np.pi / 2, np.pi / 2, 6)
+		for i in range(N):
+			d[i][:] = A_sin * np.sin(w_sin * i * dt + phi0_sin) + A_cos * np.sin(w_cos * i * dt + phi0_cos)
+		return d
+
+
+def random_uncertainty_n(n: int, dt: float, tm: float, is_ideal: bool = False) -> np.ndarray:
+	N = int(np.round(tm / dt))
+	dn = np.zeros((N, 6 * n))
+	for i in range(n):
+		dn[:, i * 6:(i + 1) * 6] = random_uncertainty(dt, tm, is_ideal)
+	return dn
