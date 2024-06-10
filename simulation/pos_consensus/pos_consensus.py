@@ -46,43 +46,52 @@ att_ctrl_param.dt = g_v['dt']
 pos_ctrl_param = get_pos_ctrl_param_from_XML(config_root)
 pos_ctrl_param.dt = g_v['dt']
 
-'''global center trajectory and offset'''
-# 第一组 大圈逆时针，小圈不动
-ref_amplitude = np.array([1, 1, 0.5, np.pi / 2])  # x y z psi
-ref_period = np.array([5, 5, 4, 5])
-ref_bias_a = np.array([0, 0, 1.0, 0])
-ref_bias_phase = np.array([np.pi / 2, 0, 0, 0])
+TEST_GROUP = 0
+if TEST_GROUP == 0:
+	# 第一组 大圈逆时针，小圈不动
+	ref_amplitude = np.array([1, 1, 0.5, np.pi / 2])  # x y z psi
+	ref_period = np.array([5, 5, 4, 5])
+	ref_bias_a = np.array([0, 0, 1.0, 0])
+	ref_bias_phase = np.array([np.pi / 2, 0, 0, 0])
+	
+	offset_amplitude = np.array([[0., 0., 0.], [0., 0., 0.], [0., 0., 0.], [0., 0., 0.]])
+	offset_period = np.array([[5, 5, 4], [5, 5, 4], [5, 5, 4], [5, 5, 4]])
+	offset_bias_a = np.array([[0.5, 0, 0], [0, 0.5, 0], [-0.5, 0., 0.], [0., -0.5, 0.]])
+	offset_bias_phase = np.array([[0., 0., 0.], [0., 0., 0.], [0., 0., 0.], [0., 0., 0.]])
+elif TEST_GROUP == 1:
+	# 第二组 整体平移，小圈不动
+	ref_amplitude = np.array([0, 0, 0, 0])  # x y z psi
+	ref_period = np.array([5, 5, 4, 5])
+	ref_bias_a = np.array([2, 2, 1.0, 0])
+	ref_bias_phase = np.array([np.pi / 2, 0, 0, 0])
 
-offset_amplitude = np.array([[0., 0., 0.], [0., 0., 0.], [0., 0., 0.], [0., 0., 0.]])
-offset_period = np.array([[5, 5, 4], [5, 5, 4], [5, 5, 4], [5, 5, 4]])
-offset_bias_a = np.array([[0.5, 0, 0], [0, 0.5, 0], [-0.5, 0., 0.], [0., -0.5, 0.]])
-offset_bias_phase = np.array([[0., 0., 0.], [0., 0., 0.], [0., 0., 0.], [0., 0., 0.]])
-# 第一组
+	offset_amplitude = np.array([[0., 0., 0.], [0., 0., 0.], [0., 0., 0.], [0., 0., 0.]])
+	offset_period = np.array([[5, 5, 4], [5, 5, 4], [5, 5, 4], [5, 5, 4]])
+	offset_bias_a = np.array([[0.5, 0, 0], [0, 0.5, 0], [-0.5, 0., 0.], [0., -0.5, 0.]])
+	offset_bias_phase = np.array([[0., 0., 0.], [0., 0., 0.], [0., 0., 0.], [0., 0., 0.]])
+elif TEST_GROUP == 2:
+	# 第三组 大圈逆时针，小圈逆时针
+	ref_amplitude = np.array([1, 1, 0.5, np.pi / 2])  # x y z psi
+	ref_period = np.array([10, 10, 8, 10])
+	ref_bias_a = np.array([0, 0, 1.0, 0])
+	ref_bias_phase = np.array([np.pi / 2, 0, 0, 0])
 
-# 第二组 整体平移，小圈不动
-# ref_amplitude = np.array([0, 0, 0, 0])  # x y z psi
-# ref_period = np.array([5, 5, 4, 5])
-# ref_bias_a = np.array([2, 2, 1.0, 0])
-# ref_bias_phase = np.array([np.pi / 2, 0, 0, 0])
-#
-# offset_amplitude = np.array([[0., 0., 0.], [0., 0., 0.], [0., 0., 0.], [0., 0., 0.]])
-# offset_period = np.array([[5, 5, 4], [5, 5, 4], [5, 5, 4], [5, 5, 4]])
-# offset_bias_a = np.array([[0.5, 0, 0], [0, 0.5, 0], [-0.5, 0., 0.], [0., -0.5, 0.]])
-# offset_bias_phase = np.array([[0., 0., 0.], [0., 0., 0.], [0., 0., 0.], [0., 0., 0.]])
-# 第二组
+	offset_amplitude = np.array([[0.5, 0.5, 0.], [0.5, 0.5, 0.], [0.5, 0.5, 0.], [0.5, 0.5, 0.]])
+	offset_period = np.array([[5, 5, 4], [5, 5, 4], [5, 5, 4], [5, 5, 4]])
+	offset_bias_a = np.array([[0., 0., 0], [0., 0., 0], [0., 0., 0.], [0., 0., 0.]])
+	offset_bias_phase = np.array([[np.pi / 2, 0., 0.], [np.pi, np.pi / 2, 0.],[-np.pi / 2, np.pi, 0.], [0., -np.pi / 2, 0.]])
+else:
+	# 不动
+	ref_amplitude = np.zeros(4)
+	ref_period = np.zeros(4)
+	ref_bias_a = np.zeros(4)
+	ref_bias_phase = np.zeros(4)
+	
+	offset_amplitude = np.zeros((4, 4))
+	offset_period = np.zeros((4, 4))
+	offset_bias_a = np.zeros((4, 4))
+	offset_bias_phase = np.zeros((4, 4))
 
-# 第三组 大圈逆时针，小圈逆时针
-# ref_amplitude = np.array([1, 1, 0.5, np.pi / 2])  # x y z psi
-# ref_period = np.array([10, 10, 8, 10])
-# ref_bias_a = np.array([0, 0, 1.0, 0])
-# ref_bias_phase = np.array([np.pi / 2, 0, 0, 0])
-#
-# offset_amplitude = np.array([[0.5, 0.5, 0.], [0.5, 0.5, 0.], [0.5, 0.5, 0.], [0.5, 0.5, 0.]])
-# offset_period = np.array([[5, 5, 4], [5, 5, 4], [5, 5, 4], [5, 5, 4]])
-# offset_bias_a = np.array([[0., 0., 0], [0., 0., 0], [0., 0., 0.], [0., 0., 0.]])
-# offset_bias_phase = np.array([[np.pi / 2, 0., 0.], [np.pi, np.pi / 2, 0.],[-np.pi / 2, np.pi, 0.], [0., -np.pi / 2, 0.]])
-# 第三组
-'''global center trajectory and offset'''
 
 '''uav group initialization'''
 uavs = []

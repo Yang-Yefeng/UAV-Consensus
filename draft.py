@@ -25,3 +25,5 @@ file = './simulation/pos_consensus/global_configuration.xml'
 # res1 = split_str_2_2d_numpy(s,4)
 # print(res1)
 # res2 = split_str_2_1d_numpy(J)
+a = '-2'
+print(float(a))
