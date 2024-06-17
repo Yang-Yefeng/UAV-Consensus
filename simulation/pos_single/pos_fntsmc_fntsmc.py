@@ -39,12 +39,12 @@ uav_param.time_max = 20
 
 '''Parameter list of the attitude controller'''
 att_ctrl_param = fntsmc_param(
-    k1=np.array([4., 4., 15.]),
-    k2=np.array([1., 1., 1.5]),
-    k3=np.array([0.05, 0.05, 0.05]),
-    k4=np.array([5, 4, 5]),  # 要大
-    alpha1=np.array([1.01, 1.01, 1.01]),
-    alpha2=np.array([1.01, 1.01, 1.01]),
+    k1=np.array([6.00810648, 6.80311651, 13.47563418]).astype(float),			# 手调: 4 4 15
+    k2=np.array([2.04587905, 1.60844957, 0.98401018]).astype(float),			# 手调: 1 1 1.5
+    k3=np.array([0.05, 0.05, 0.05]).astype(float),
+    k4=np.array([9.85776965, 10.91725924, 13.90115023]).astype(float),       # 要大     手调: 5 4 5
+    alpha1=np.array([1.01, 1.01, 1.01]).astype(float),
+    alpha2=np.array([1.01, 1.01, 1.01]).astype(float),
     dim=3,
     dt=DT
     # k1 控制滑模中 e 的占比，k3 控制滑模中 sig(e)^alpha1 的占比
@@ -103,7 +103,7 @@ if __name__ == '__main__':
     ref, dot_ref, dot2_ref = ref_uav(uav.time, ref_amplitude, ref_period, ref_bias_a, ref_bias_phase)  # 整体参考信号 xd yd zd psid
     rhod = np.array([phi_d, theta_d, ref[3]]).astype(float)  # 内环参考信号 phi_d theta_d psi_d
     dot_rhod = np.array([dot_phi_d, dot_theta_d, dot_ref[3]]).astype(float)  # 内环参考信号导数
-
+    
     '''initial error'''
     e_rho = uav.rho1() - rhod
     de_rho = uav.dot_rho1() - dot_rhod
@@ -170,7 +170,7 @@ if __name__ == '__main__':
         dot_theta_d = (theta_d - theta_d_old) / uav.dt
         rhod = np.array([phi_d, theta_d, ref[3]])  # phi_d theta_d psi_d
         dot_rhod = np.array([dot_phi_d, dot_theta_d, dot_ref[3]])  # phi_d theta_d psi_d 的一阶导数
-
+        
         '''6. inner loop control'''
         e_rho = uav.rho1() - rhod
         de_rho = np.dot(uav.W(), uav.rho2()) - dot_rhod
@@ -199,6 +199,7 @@ if __name__ == '__main__':
 
         '''7. rk44 update'''
         action_4_uav = np.array([throttle, ctrl_in.control_in[0], ctrl_in.control_in[1], ctrl_in.control_in[2]])
+        print(dot_rhod, action_4_uav)
         uav.rk44(action=action_4_uav, dis=uncertainty, n=1, att_only=False)
 
         '''8. data record'''

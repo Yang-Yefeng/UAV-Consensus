@@ -3,6 +3,7 @@ from utils.XML_Operation import *
 from utils.collector import data_collector
 from controller.FNTSMC import fntsmc_param
 import matplotlib.pyplot as plt
+from utils.XML_Operation import *
 
 
 def deg2rad(deg: float) -> float:

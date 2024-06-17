@@ -72,9 +72,7 @@ if __name__ == '__main__':
     ref_bias_a = np.array([0, 0, 0])
     ref_bias_phase = np.array([0, np.pi / 2, 0])
 
-    rhod, dot_rhod, dot2_rhod, dot3_rhod = ref_inner(uav.time, ref_amplitude, ref_period, ref_bias_a, ref_bias_phase)
-    e0 = uav.rho1() - rhod
-    de0 = uav.dot_rho1() - dot_rhod
+    rho_d_all, dot_rho_d_all, dot2_rho_d_all = ref_inner_all(ref_amplitude, ref_period, ref_bias_a, ref_bias_phase, uav.time_max, uav.dt)
 
     if OBSERVER == 'rd3':
         '''
@@ -84,8 +82,6 @@ if __name__ == '__main__':
                        omega=np.array([7, 7, 7]),
                        dim=3,
                        dt=uav.dt)
-        syst_dynamic0 = np.dot(uav.dW(), uav.omega()) + np.dot(uav.W(), uav.A_omega() + np.dot(uav.B_omega(), ctrl_in.control_in))
-        observer.set_init(e0=e0, de0=de0, syst_dynamic=syst_dynamic0)
     else:
         observer = None
 
@@ -98,12 +94,14 @@ if __name__ == '__main__':
 
         '''1. 计算 tk 时刻参考信号 和 生成不确定性'''
         uncertainty = generate_uncertainty(time=uav.time, is_ideal=IS_IDEAL)
-        rhod, dot_rhod, dot2_rhod, dot3_rhod = ref_inner(uav.time, ref_amplitude, ref_period, ref_bias_a, ref_bias_phase)
+        rho_d = rho_d_all[uav.n]
+        dot_rho_d = dot_rho_d_all[uav.n]
+        dot2_rho_d = dot2_rho_d_all[uav.n]
         '''1. 计算 tk 时刻参考信号 和 生成不确定性'''
-
+        
         '''2. 计算 tk 时刻误差信号'''
-        e_rho = uav.rho1() - rhod
-        de_rho = uav.dot_rho1() - dot_rhod
+        e_rho = uav.rho1() - rho_d
+        de_rho = uav.dot_rho1() - dot_rho_d
         '''2. 计算 tk 时刻误差信号'''
 
         '''3. 观测器'''
@@ -117,7 +115,7 @@ if __name__ == '__main__':
         '''4. 计算控制量'''
         ctrl_in.control_update_inner(e_rho=e_rho,
 									 dot_e_rho=de_rho,
-									 dd_ref=dot2_rhod,
+									 dd_ref=dot2_rho_d,
 									 W=uav.W(),
 									 dW=uav.dW(),
 									 omega=uav.omega(),
@@ -139,7 +137,7 @@ if __name__ == '__main__':
             in_obs_error = observer.obs_error
         data_block = {'time': uav.time,
                       'control': action_4_uav,
-                      'ref_angle': rhod,
+                      'ref_angle': rho_d,
                       'ref_pos': np.array([0., 0., 0.]),
                       'ref_vel': np.array([0., 0., 0.]),
                       'd_in': np.dot(uav.W(), np.array([uncertainty[3], uncertainty[4], uncertainty[5]])),

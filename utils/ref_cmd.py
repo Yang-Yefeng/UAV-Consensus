@@ -18,9 +18,23 @@ def ref_inner(time, amplitude: np.ndarray, period: np.ndarray, bias_a: np.ndarra
 	_r = amplitude * np.sin(w * time + bias_phase) + bias_a
 	_dr = amplitude * w * np.cos(w * time + bias_phase)
 	_ddr = -amplitude * w ** 2 * np.sin(w * time + bias_phase)
-	_dddr = -amplitude * w ** 3 * np.cos(w * time + bias_phase)
-	return _r, _dr, _ddr, _dddr
+	return _r, _dr, _ddr
 
+def ref_inner_all(a: np.ndarray, p: np.ndarray, ba: np.ndarray, bp: np.ndarray, t_max: float, dt: float):
+	t = np.linspace(0, t_max, int(t_max / dt) + 1)
+	w = 2 * np.pi / p
+	r_phi = ba[0] + a[0] * np.sin(w[0] * t + bp[0])
+	r_theta = ba[1] + a[1] * np.sin(w[1] * t + bp[1])
+	r_psi = ba[2] + a[2] * np.sin(w[2] * t + bp[2])
+	
+	r_d_phi = a[0] * w[0] * np.cos(w[0] * t + bp[0])
+	r_d_theta = a[1] * w[1] * np.cos(w[1] * t + bp[1])
+	r_d_psi = a[2] * w[2] * np.cos(w[2] * t + bp[2])
+	
+	r_dd_phi = -a[0] * w[0] ** 2 * np.sin(w[0] * t + bp[0])
+	r_dd_theta = -a[1] * w[1] ** 2 * np.sin(w[1] * t + bp[1])
+	r_dd_psi = -a[2] * w[2] ** 2 * np.sin(w[2] * t + bp[2])
+	return np.vstack((r_phi, r_theta, r_psi)).T, np.vstack((r_d_phi, r_d_theta, r_d_psi)).T, np.vstack((r_dd_phi, r_dd_theta, r_dd_psi)).T
 
 def ref_uav(time: float, amplitude: np.ndarray, period: np.ndarray, bias_a: np.ndarray, bias_phase: np.ndarray):
 	"""
@@ -39,7 +53,6 @@ def ref_uav(time: float, amplitude: np.ndarray, period: np.ndarray, bias_a: np.n
 	_r = amplitude * np.sin(w * time + bias_phase) + bias_a
 	_dr = amplitude * w * np.cos(w * time + bias_phase)
 	_ddr = -amplitude * w ** 2 * np.sin(w * time + bias_phase)
-	# _dddr = -amplitude * w ** 3 * np.cos(w * time + bias_phase)
 	return _r, _dr, _ddr
 
 

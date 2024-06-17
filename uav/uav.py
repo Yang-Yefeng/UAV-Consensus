@@ -1,4 +1,5 @@
 import numpy as np
+import os
 
 from utils.utils import *
 
@@ -115,6 +116,14 @@ class UAV:
 		self.dangle_min = np.array([-deg2rad(360 * 3), -deg2rad(360 * 3), -deg2rad(360 * 2)])
 		self.dangle_max = np.array([deg2rad(360 * 3), deg2rad(360 * 3), deg2rad(360 * 2)])
 		'state limitation'
+		
+		self.reward = 0.
+		self.sum_reward = 0.
+		self.Q_att = np.array([1., 1., 1.])  # 角度误差惩罚
+		self.Q_pqr = np.array([0.01, 0.01, 0.01])  # 角速度误差惩罚
+		self.R = np.array([0.01, 0.01, 0.01])  # 期望加速度输出 (即控制输出) 惩罚
+		
+		self.project_path = os.path.dirname(os.path.abspath(__file__)) + '/../'
 	
 	def ode(self, xx: np.ndarray, dis: np.ndarray):
 		"""
@@ -223,25 +232,16 @@ class UAV:
 	def uav_pqr(self):
 		return np.array([self.p, self.q, self.r])
 	
+	def uav_dot_att(self):
+		return np.dot(self.W(), self.uav_pqr())
+	
 	def set_state(self, xx: np.ndarray):
 		[self.x, self.y, self.z, self.vx, self.vy, self.vz, self.phi, self.theta, self.psi, self.p, self.q, self.r] = xx[:]
 	
 	def W(self):
-		"""
-        :brief:  [1  sin(phi)tan(theta)      cos(phi)tan(theta)]
-                 [0       cos(phi)               -sin(phi)     ]
-                 [0  sin(phi)/cos(theta)    cos(phi)/cos(theta)]
-        :return: f1(rho_1)
-        """
-		_f1_rho1 = np.zeros((3, 3)).astype(float)
-		_f1_rho1[0][0] = 1.
-		_f1_rho1[0][1] = np.sin(self.phi) * np.tan(self.theta)
-		_f1_rho1[0][2] = np.cos(self.phi) * np.tan(self.theta)
-		_f1_rho1[1][1] = np.cos(self.phi)
-		_f1_rho1[1][2] = -np.sin(self.phi)
-		_f1_rho1[2][1] = np.sin(self.phi) / np.cos(self.theta)
-		_f1_rho1[2][2] = np.cos(self.phi) / np.cos(self.theta)
-		return _f1_rho1
+		return np.array([[1, np.sin(self.phi) * np.tan(self.theta), np.cos(self.phi) * np.tan(self.theta)],
+						 [0, np.cos(self.phi), -np.sin(self.phi)],
+						 [0, np.sin(self.phi) / np.cos(self.theta), np.cos(self.phi) / np.cos(self.theta)]])
 	
 	def f2(self):
 		"""
@@ -337,3 +337,29 @@ class UAV:
 	
 	def B_omega(self):
 		return self.J_inv()
+	
+	def get_reward(self, r, dr, acc):
+		_e_att = self.uav_att() - r
+		_e_pqr = self.uav_dot_att() - dr
+		
+		u_att = -np.dot(_e_att ** 2, self.Q_att)
+		u_pqr = -np.dot(_e_pqr ** 2, self.Q_pqr)
+		u_acc = -np.dot(acc ** 2, self.R)
+		
+		return u_att + u_pqr + u_acc
+		
+	def reset_with_param(self, param: uav_param = None):
+		self.reward = 0.
+		self.sum_reward = 0.
+		self.n = 0
+		self.time = 0.
+		self.throttle = self.m * self.g  # 油门
+		self.torque = np.array([0., 0., 0.]).astype(float)  # 转矩
+		self.control = np.array([self.m * self.g, 0., 0., 0.]).astype(float)
+		if param is not None:
+			[self.x, self.y, self.z] = param.pos0[:]
+			[self.vx, self.vy, self.vz] = param.vel0[:]
+			[self.phi, self.theta, self.psi] = param.angle0[:]
+			[self.p, self.q, self.r] = param.pqr0[:]
+		else:
+			self.set_state(np.zeros(12))

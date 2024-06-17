@@ -83,7 +83,10 @@ class data_collector:
         self.d_out_e_1st = observeData[:, 16:19]
 
         self.state = uav_stateData[:, 1: 13]
-
+    
+    def reset(self):
+        self.index = 0
+    
     def plot_pos(self):
         plt.figure()
         plt.subplot(1, 3, 1)
@@ -299,3 +302,4 @@ class data_collector:
         # plt.xlabel('time(s)')
         # # plt.ylim((-4, 4))
         # plt.title('1st_error dz')
+    

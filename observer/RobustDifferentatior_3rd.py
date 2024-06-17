@@ -121,3 +121,11 @@ class robust_differentiator_3rd:
 		self.z3 = self.z3 + self.dz3 * self.dt
 
 		return self.z3, self.dz3
+	
+	def reset(self):
+		self.z1 = np.zeros(self.dim)
+		self.z2 = np.zeros(self.dim)
+		self.z3 = np.zeros(self.dim)
+		self.dz1 = np.zeros(self.dim)
+		self.dz2 = np.zeros(self.dim)
+		self.dz3 = np.zeros(self.dim)
