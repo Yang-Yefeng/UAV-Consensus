@@ -39,7 +39,7 @@ uav_param.vel0 = np.array([0, 0, 0])
 uav_param.angle0 = np.array([0, 0, 0])
 uav_param.pqr0 = np.array([0, 0, 0])
 uav_param.dt = DT
-uav_param.time_max = 20
+uav_param.time_max = 10
 '''Parameter list of the quadrotor'''
 
 
@@ -67,10 +67,14 @@ if __name__ == '__main__':
     uav = UAV(uav_param)
     ctrl_in = fntsmc(att_ctrl_param)
 
-    ref_amplitude = np.array([deg2rad(70), deg2rad(70), np.pi / 2])
-    ref_period = np.array([5, 5, 4])
+    # ref_amplitude = np.array([deg2rad(70), deg2rad(70), np.pi / 2])
+    # ref_period = np.array([5, 5, 4])
+    # ref_bias_a = np.array([0, 0, 0])
+    # ref_bias_phase = np.array([0, np.pi / 2, 0])
+    ref_amplitude = np.array([0.17, 0.17, 0.17])
+    ref_period = np.array([3, 3, 3])
     ref_bias_a = np.array([0, 0, 0])
-    ref_bias_phase = np.array([0, np.pi / 2, 0])
+    ref_bias_phase = np.array([0, 0, 0])
 
     rho_d_all, dot_rho_d_all, dot2_rho_d_all = ref_inner_all(ref_amplitude, ref_period, ref_bias_a, ref_bias_phase, uav.time_max, uav.dt)
 
@@ -79,7 +83,7 @@ if __name__ == '__main__':
             m 和 n 可以相等，也可以不同。m对应低次，n对应高次。
         '''
         observer = rd3(use_freq=True,
-                       omega=np.array([7, 7, 7]),
+                       omega=np.array([3.5, 3.5, 3.5]),
                        dim=3,
                        dt=uav.dt)
     else:
@@ -129,6 +133,8 @@ if __name__ == '__main__':
         action_4_uav = np.array([uav.m * uav.g, ctrl_in.control_in[0], ctrl_in.control_in[1], ctrl_in.control_in[2]])
         uav.rk44(action=action_4_uav, dis=uncertainty, n=1, att_only=True)
         '''5. 状态更新'''
+        
+        uav.sum_reward += uav.get_reward(rho_d, dot_rho_d, ctrl_in.control_in)
 
         '''6. 数据存储'''
         if IS_IDEAL:
@@ -149,7 +155,7 @@ if __name__ == '__main__':
                       'state': np.hstack((np.zeros(6), uav.uav_att_pqr_call_back()))}
         data_record.record(data=data_block)
         '''6. 数据存储'''
-
+    print(uav.sum_reward)
     SAVE = True
     if SAVE:
         if windows:

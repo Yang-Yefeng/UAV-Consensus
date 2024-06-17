@@ -1,7 +1,9 @@
 import numpy as np
 import os
+import pandas as pd
 
 from utils.utils import *
+from utils.PPOActor import Normalization
 
 
 class uav_param:
@@ -91,8 +93,6 @@ class UAV:
 		[self.phi, self.theta, self.psi] = param.angle0[:]
 		[self.p, self.q, self.r] = param.pqr0[:]
 		
-		self.w_rotor = np.zeros(4)
-		
 		self.dt = param.dt
 		self.n = 0
 		self.time = 0.
@@ -121,9 +121,14 @@ class UAV:
 		self.sum_reward = 0.
 		self.Q_att = np.array([1., 1., 1.])  # 角度误差惩罚
 		self.Q_pqr = np.array([0.01, 0.01, 0.01])  # 角速度误差惩罚
-		self.R = np.array([0.01, 0.01, 0.01])  # 期望加速度输出 (即控制输出) 惩罚
+		self.R_att = np.array([0.0, 0.0, 0.0])  # 期望加速度输出 (即控制输出) 惩罚
+		
+		self.Q_pos = np.array([1., 1., 1.])
+		self.Q_vel = np.array([0.01, 0.01, 0.01])
+		self.R_pos = np.array([0.0, 0.0, 0.0])
 		
 		self.project_path = os.path.dirname(os.path.abspath(__file__)) + '/../'
+		self.state_norm = Normalization(6)
 	
 	def ode(self, xx: np.ndarray, dis: np.ndarray):
 		"""
@@ -159,10 +164,8 @@ class UAV:
 		
 		'''1. 无人机绕机体系旋转的角速度p q r 的微分方程'''
 		self.J0 = 0.  # 不考虑陀螺力矩，用于分析观测器的效果
-		dp = (-self.kr * _p - _q * _r * (self.J[2] - self.J[1]) + self.torque[0]
-			  - self.J0 * _q * (-self.w_rotor[0] - self.w_rotor[1] + self.w_rotor[2] + self.w_rotor[3])) / self.J[0] + dis[3]
-		dq = (-self.kr * _q - _p * _r * (self.J[0] - self.J[2]) + self.torque[1]
-			  - self.J0 * _p * (self.w_rotor[0] + self.w_rotor[1] - self.w_rotor[2] - self.w_rotor[3])) / self.J[1] + dis[4]
+		dp = (-self.kr * _p - _q * _r * (self.J[2] - self.J[1]) + self.torque[0]) / self.J[0] + dis[3]
+		dq = (-self.kr * _q - _p * _r * (self.J[0] - self.J[2]) + self.torque[1]) / self.J[1] + dis[4]
 		dr = (-self.kr * _r - _p * _q * (self.J[1] - self.J[0]) + self.torque[2]) / self.J[2] + dis[5]
 		# if dr == np.nan:
 		#     print(self.time)
@@ -338,13 +341,34 @@ class UAV:
 	def B_omega(self):
 		return self.J_inv()
 	
-	def get_reward(self, r, dr, acc):
+	def load_norm_normalizer_from_file(self, file):
+		data = pd.read_csv(file, header=0).to_numpy()
+		self.state_norm.running_ms.n = data[0, 0]
+		self.state_norm.running_ms.mean = data[:, 1]
+		self.state_norm.running_ms.std = data[:, 2]
+		self.state_norm.running_ms.S = data[:, 3]
+		self.state_norm.running_ms.n = data[0, 4]
+		self.state_norm.running_ms.mean = data[:, 5]
+		self.state_norm.running_ms.std = data[:, 6]
+		self.state_norm.running_ms.S = data[:, 7]
+	
+	def get_reward_att(self, r, dr, acc):
 		_e_att = self.uav_att() - r
 		_e_pqr = self.uav_dot_att() - dr
 		
 		u_att = -np.dot(_e_att ** 2, self.Q_att)
 		u_pqr = -np.dot(_e_pqr ** 2, self.Q_pqr)
-		u_acc = -np.dot(acc ** 2, self.R)
+		u_acc = -np.dot(acc ** 2, self.R_att)
+		
+		return u_att + u_pqr + u_acc
+	
+	def get_reward_pos(self, r, dr, acc):
+		_e_pos = self.uav_att() - r
+		_e_vel = self.uav_dot_att() - dr
+		
+		u_att = -np.dot(_e_pos ** 2, self.Q_pos)
+		u_pqr = -np.dot(_e_vel ** 2, self.Q_vel)
+		u_acc = -np.dot(acc ** 2, self.R_pos)
 		
 		return u_att + u_pqr + u_acc
 		

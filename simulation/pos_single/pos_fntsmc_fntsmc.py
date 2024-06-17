@@ -34,7 +34,7 @@ uav_param.vel0 = np.array([0, 0, 0])
 uav_param.angle0 = np.array([0, 0, 0])
 uav_param.pqr0 = np.array([0, 0, 0])
 uav_param.dt = DT
-uav_param.time_max = 20
+uav_param.time_max = 10
 '''Parameter list of the quadrotor'''
 
 '''Parameter list of the attitude controller'''
@@ -100,15 +100,15 @@ if __name__ == '__main__':
     dot_theta_d = (theta_d - theta_d_old) / uav.dt
     throttle = uav.m * uav.g
 
-    ref, dot_ref, dot2_ref = ref_uav(uav.time, ref_amplitude, ref_period, ref_bias_a, ref_bias_phase)  # 整体参考信号 xd yd zd psid
-    rhod = np.array([phi_d, theta_d, ref[3]]).astype(float)  # 内环参考信号 phi_d theta_d psi_d
-    dot_rhod = np.array([dot_phi_d, dot_theta_d, dot_ref[3]]).astype(float)  # 内环参考信号导数
-    
-    '''initial error'''
-    e_rho = uav.rho1() - rhod
-    de_rho = uav.dot_rho1() - dot_rhod
-    e_eta = uav.eta() - ref[0: 3]
-    de_eta = uav.dot_eta() - dot_ref[0: 3]
+    # ref, dot_ref, dot2_ref = ref_uav(uav.time, ref_amplitude, ref_period, ref_bias_a, ref_bias_phase)  # 整体参考信号 xd yd zd psid
+    # rhod = np.array([phi_d, theta_d, ref[3]]).astype(float)  # 内环参考信号 phi_d theta_d psi_d
+    # dot_rhod = np.array([dot_phi_d, dot_theta_d, dot_ref[3]]).astype(float)  # 内环参考信号导数
+    #
+    # '''initial error'''
+    # e_rho = uav.rho1() - rhod
+    # de_rho = uav.dot_rho1() - dot_rhod
+    # e_eta = uav.eta() - ref[0: 3]
+    # de_eta = uav.dot_eta() - dot_ref[0: 3]
 
     '''observer'''
     if not IS_IDEAL:
@@ -117,16 +117,16 @@ if __name__ == '__main__':
                      dim=3,
                      thresh=np.array([0.5, 0.5, 0.5]),
                      dt=uav.dt)
-        syst_dyin = np.dot(uav.dW(), uav.omega()) + np.dot(uav.W(), uav.A_omega() + np.dot(uav.B_omega(), ctrl_in.control_in))
-        obs_in.set_init(e0=e_rho, de0=de_rho, syst_dynamic=syst_dyin)
+        # syst_dyin = np.dot(uav.dW(), uav.omega()) + np.dot(uav.W(), uav.A_omega() + np.dot(uav.B_omega(), ctrl_in.control_in))
+        # obs_in.set_init(e0=e_rho, de0=de_rho, syst_dynamic=syst_dyin)
 
         obs_out = rd3(use_freq=True,
-                      omega=np.array([4, 4, 4]),  # 实际实验这个数一定要小 0.9, 0.9, 0.9，或者从小往大调
+                      omega=np.array([3.2, 3.2, 3.2]),  # 实际实验这个数一定要小 0.9, 0.9, 0.9，或者从小往大调
                       dim=3,
                       thresh=np.array([0.5, 0.5, 0.5]),
                       dt=uav.dt)
-        syst_dyout = -uav.kt / uav.m * uav.dot_eta() + uav.A()
-        obs_out.set_init(e0=uav.eta(), de0=uav.dot_eta(), syst_dynamic=syst_dyout)
+        # syst_dyout = -uav.kt / uav.m * uav.dot_eta() + uav.A()
+        # obs_out.set_init(e0=uav.eta(), de0=uav.dot_eta(), syst_dynamic=syst_dyout)
     else:
         obs_in = None
         obs_out = None
@@ -151,7 +151,7 @@ if __name__ == '__main__':
             obs_eta, _ = obs_out.observe(x=uav.eta(), syst_dynamic=syst_dynamic)
         else:
             obs_eta = np.zeros(3)
-
+        # obs_eta = np.zeros(3)
         '''4. outer loop control'''
         ctrl_out.control_update_outer(e_eta=e_eta,
 									  dot_e_eta=de_eta,
@@ -165,7 +165,9 @@ if __name__ == '__main__':
         phi_d_old = phi_d
         theta_d_old = theta_d
         phi_d, theta_d, throttle = uo_2_ref_angle_throttle(uo=ctrl_out.control_out, att=uav.uav_att(), m=uav.m, g=uav.g)
-
+        
+        uav.sum_reward += uav.get_reward_pos(ref[0: 3], dot_ref[0:3], ctrl_out.control_out)
+        
         dot_phi_d = (phi_d - phi_d_old) / uav.dt
         dot_theta_d = (theta_d - theta_d_old) / uav.dt
         rhod = np.array([phi_d, theta_d, ref[3]])  # phi_d theta_d psi_d
@@ -199,7 +201,6 @@ if __name__ == '__main__':
 
         '''7. rk44 update'''
         action_4_uav = np.array([throttle, ctrl_in.control_in[0], ctrl_in.control_in[1], ctrl_in.control_in[2]])
-        print(dot_rhod, action_4_uav)
         uav.rk44(action=action_4_uav, dis=uncertainty, n=1, att_only=False)
 
         '''8. data record'''
@@ -222,7 +223,8 @@ if __name__ == '__main__':
                       'd_out_e_1st': out_obs_error,
                       'state': uav.uav_state_call_back()}
         data_record.record(data=data_block)
-
+    
+    print('reward', uav.sum_reward)
     SAVE = False
     if SAVE:
         os.mkdir(new_path)

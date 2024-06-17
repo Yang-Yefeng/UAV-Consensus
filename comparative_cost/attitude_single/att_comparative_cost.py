@@ -7,6 +7,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import platform
 
+import torch
+
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/../../../")
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/../../")
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/../")
@@ -16,6 +18,7 @@ from controller.FNTSMC import fntsmc_param, fntsmc
 from uav.uav import UAV, uav_param
 from utils.ref_cmd import *
 from utils.utils import *
+from utils.PPOActor import PPOActor_Gaussian
 
 cur_path = os.path.dirname(os.path.abspath(__file__))
 windows = platform.system().lower() == 'windows'
@@ -37,7 +40,7 @@ uav_param.vel0 = np.array([0, 0, 0])
 uav_param.angle0 = np.array([0, 0, 0])
 uav_param.pqr0 = np.array([0, 0, 0])
 uav_param.dt = DT
-uav_param.time_max = 20
+uav_param.time_max = 10
 '''Parameter list of the quadrotor'''
 
 '''Parameter list of the attitude controller'''
@@ -57,34 +60,47 @@ att_ctrl_param = fntsmc_param(
 )
 '''Parameter list of the attitude controller'''
 
-IS_IDEAL = False
-USE_OBS = True
-USE_RL = False
+
+def reset_att_ctrl_param(flag: str):
+    if flag == 'zero':
+        att_ctrl_param.k1 = 0.01 * np.ones(3)
+        att_ctrl_param.k2 = 0.01 * np.ones(3)
+        att_ctrl_param.k4 = 0.01 * np.ones(3)
+    elif flag == 'random':
+        att_ctrl_param.k1 = np.random.random(3)
+        att_ctrl_param.k2 = np.random.random(3)
+        att_ctrl_param.k4 = np.random.random(3)
+    else:  # optimal 手调的
+        att_ctrl_param.k1 = np.array([4., 4., 15.])
+        att_ctrl_param.k2 = np.array([1., 1., 1.5])
+        att_ctrl_param.k4 = np.array([5, 4, 5])
 
 
-if __name__ == '__main__':
-    uav = UAV(uav_param)
-    observer = rd3(use_freq=True, omega=np.array([7, 7, 7]), dim=3, dt=uav.dt)
-    ctrl_in = fntsmc(att_ctrl_param)
-    
-    A_num = 61
-    T_num = 15
-    ref_A = np.linspace(0, deg2rad(60), A_num)
+IS_IDEAL = True
+
+# RL
+USE_OBS = False
+USE_RL = True
+
+
+def AoLiGeiGanLe(use_obs:bool, use_rl:bool) -> np.ndarray:
+    A_num = 10 # 31
+    T_num = 5  # 15
+    ref_A = np.linspace(deg2rad(10), deg2rad(70), A_num)
     ref_T = np.linspace(3, 6, T_num)
-    
-    cost = np.zeros((A_num * T_num, 6))  # a, t, r1 ,r2
-    
+    res = np.zeros((A_num * T_num, 3))
+    _i = 0
     for _a in ref_A:
         for _t in ref_T:
+            ra = _a * np.ones(3)
+            rp = _t * np.ones(3)
+            rba = np.array([0, 0, 0])
+            rbp = np.array([0, 0, 0])
+            rho_d_all, dot_rho_d_all, dot2_rho_d_all = ref_inner_all(ra, rp, rba, rbp, uav.time_max, uav.dt)
+            
             uav.reset_with_param()  # 初始化无人机
             observer.reset()  # 初始化观测器
-            ctrl_in.reset()  # 初始化控制器
-            
-            ref_amplitude = _a * np.ones(3)
-            ref_period = _t * np.ones(3)
-            ref_bias_a = np.array([0, 0, 0])
-            ref_bias_phase = np.array([0, 0, 0])
-            rho_d_all, dot_rho_d_all, dot2_rho_d_all = ref_inner_all(ref_amplitude, ref_period, ref_bias_a, ref_bias_phase, uav.time_max, uav.dt)
+            ctrl_in.fntsmc_reset_with_new_param(att_ctrl_param)  # 初始化控制器
             
             while uav.time < uav.time_max:
                 '''1. 计算 tk 时刻参考信号 和 生成不确定性'''
@@ -96,13 +112,18 @@ if __name__ == '__main__':
                 de_rho = uav.dot_rho1() - dot_rho_d
                 
                 '''3. 观测器'''
-                if USE_OBS:
+                if use_obs:
                     syst_dynamic = np.dot(uav.dW(), uav.omega()) + np.dot(uav.W(), uav.A_omega() + np.dot(uav.B_omega(), ctrl_in.control_in))
                     delta_obs, _ = observer.observe(syst_dynamic=syst_dynamic, x=uav.rho1())
                 else:
                     delta_obs = np.zeros(3)
                 
                 '''4. 计算控制量'''
+                if use_rl:
+                    _s = np.concatenate((e_rho, de_rho))
+                    new_att_ctrl_parma = actor.evaluate(uav.state_norm(_s, update=False))
+                    hehe = np.array([5, 5, 5, 0, 0, 0, 5, 5, 5]).astype(float)
+                    ctrl_in.get_param_from_actor(new_att_ctrl_parma * hehe, hehe_flag=False)
                 ctrl_in.control_update_inner(e_rho=e_rho,
                                              dot_e_rho=de_rho,
                                              dd_ref=dot2_rho_d,
@@ -119,9 +140,42 @@ if __name__ == '__main__':
                 uav.rk44(action=action_4_uav, dis=uncertainty, n=1, att_only=True)
                 
                 '''6. 计算惩罚'''
-                uav.sum_reward += uav.get_reward(rho_d, dot_rho_d, ctrl_in.control_in)
-                
-                '''7. 数据存储'''
-                
-                
-    pd.DataFrame(cost, columns=['A', 'T', 'r_rl_obs', 'r_rl', 'r_fntsmc_obs', 'r_fntsmc']).to_csv('att_cost_surface.csv', sep=',', index=False)
+                uav.sum_reward += uav.get_reward_att(rho_d, dot_rho_d, ctrl_in.control_in)
+            
+            res[_i, :] = np.array([_a, _t, uav.sum_reward])
+            if _i % 50 == 0:
+                print('...', _i, '...')
+            _i += 1
+    
+    return res
+
+if __name__ == '__main__':
+    uav = UAV(uav_param)
+    observer = rd3(use_freq=True, omega=np.array([6, 6, 6]), dim=3, dt=uav.dt)
+    ctrl_in = fntsmc(att_ctrl_param)
+    
+    actor_path = uav.project_path + 'neural_network/att_maybe_good_1/'
+    actor = PPOActor_Gaussian(state_dim=6, action_dim=9)
+    actor.load_state_dict(torch.load(actor_path + 'actor'))
+    
+    uav.load_norm_normalizer_from_file(actor_path + 'state_norm.csv')
+    base_path = uav.project_path + 'comparative_cost/attitude_single/'
+    
+    # print('Group1')
+    # r1 = AoLiGeiGanLe(use_obs=False, use_rl=True)
+    # pd.DataFrame(r1, columns=['A', 'T', 'r_rl']).to_csv(base_path + 'att_cost_surface_rl_no_obs.csv', sep=',', index=False)
+    
+    # print('Group2')
+    # r2 = AoLiGeiGanLe(use_obs=True, use_rl=True)
+    # pd.DataFrame(r2, columns=['A', 'T', 'r_rl_obs']).to_csv(base_path + 'att_cost_surface_rl_obs.csv', sep=',', index=False)
+
+    print('Group3')
+    r3 = AoLiGeiGanLe(use_obs=False, use_rl=False)
+    pd.DataFrame(r3, columns=['A', 'T', 'r_fntsmc']).to_csv(base_path + 'att_cost_surface_fntmsc_no_obs.csv', sep=',', index=False)
+
+    # print('Group4')
+    # r4 = AoLiGeiGanLe(use_obs=True, use_rl=False)
+    # pd.DataFrame(r4, columns=['A', 'T', 'r_fntsmc_obs']).to_csv(base_path + 'att_cost_surface_fntmsc_obs.csv', sep=',', index=False)
+    
+    # cost = np.concatenate((r1[:, 0: 3], r2[:, 2, None], r3[:, 2, None], r4[:, 2, None]), axis=1)
+    # pd.DataFrame(cost, columns=['A', 'T', 'r_rl', 'r_rl_obs', 'r_fntsmc', 'r_fntsmc_obs']).to_csv('att_cost_surface.csv', sep=',', index=False)

@@ -65,6 +65,48 @@ def offset_uav_n(time: float, amplitude: np.ndarray, period: np.ndarray, bias_a:
 	return _off, _doff, _ddoff
 
 
+# def generate_uncertainty(time: float, is_ideal: bool = False) -> np.ndarray:
+# 	"""
+#     :param time:        time
+#     :param is_ideal:    ideal or not
+#     :return:            Fdx, Fdy, Fdz, dp, dq, dr
+#     """
+# 	if is_ideal:
+# 		return np.array([0, 0, 0, 0, 0, 0]).astype(float)
+# 	else:
+# 		T = 2
+# 		w = 2 * np.pi / T
+# 		phi0 = 0.
+# 		if time <= 5:
+# 			phi0 = 0.
+# 			Fdx = 0.5 * np.sin(w * time + phi0) + 0.2 * np.cos(3 * w * time + phi0) + 0.2
+# 			Fdy = 0.5 * np.cos(w * time + phi0) + 0.2 * np.sin(3 * w * time + phi0) + 0.4
+# 			Fdz = 0.5 * np.sin(w * time + phi0) + 0.2 * np.cos(3 * w * time + phi0) - 0.5
+#
+# 			dp = 0.5 * np.sin(w * time + phi0) + 0.2 * np.cos(w * time + phi0)
+# 			dq = 0.5 * np.cos(w * time + phi0) + 0.2 * np.sin(w * time + phi0)
+# 			dr = 0.5 * np.cos(w * time + phi0) + 0.2 * np.sin(w * time + phi0)
+# 		elif 5 < time <= 10:
+# 			Fdx = 1.5
+# 			Fdy = 0.4 * (time - 5.0)
+# 			Fdz = -0.6
+#
+# 			dp = 0.5 * np.sin(w * time + phi0) + 0.2 * np.cos(2 * np.sin(2 * w) * time + phi0)
+# 			dq = 0.5 * np.cos(1.5 * np.sin(2 * w) * time + phi0) + 0.2 * np.sin(w * time + phi0)
+# 			dr = 0.5 * np.sign(np.round(time - 5) % 2 - 0.5)
+# 		else:
+# 			phi0 = np.pi / 2
+# 			Fdx = 0.5 * np.sin(np.cos(2 * w) * time + phi0) - 1.0 * np.cos(3 * np.sin(w) * time + phi0)
+# 			Fdy = 0.5 * np.sign(np.round(time - 10) % 3 - 1.5) + 0.5 * np.sin(2 * w * time + phi0) - 0.4
+# 			Fdz = 0.5 * np.cos(w * time + phi0) - 1.0 * np.sin(3 * w + time + phi0) + 1.0
+#
+# 			dp = 0.5 * np.sin(np.sin(2 * w) * time + phi0) + 0.2 * np.cos(w * time + phi0)
+# 			dq = 1.5 * np.cos(w * time + phi0) + 0.2 * np.sin(w * time + phi0) - 0.7
+# 			dr = 0.5 * np.cos(2 * w * time + phi0) + 0.6 * np.sin(w * time + phi0)
+#
+# 		return np.array([Fdx, Fdy, Fdz, dp, dq, dr])
+
+
 def generate_uncertainty(time: float, is_ideal: bool = False) -> np.ndarray:
 	"""
     :param time:        time
@@ -74,35 +116,16 @@ def generate_uncertainty(time: float, is_ideal: bool = False) -> np.ndarray:
 	if is_ideal:
 		return np.array([0, 0, 0, 0, 0, 0]).astype(float)
 	else:
-		T = 2
+		T = 5
 		w = 2 * np.pi / T
 		phi0 = 0.
-		if time <= 5:
-			phi0 = 0.
-			Fdx = 0.5 * np.sin(w * time + phi0) + 0.2 * np.cos(3 * w * time + phi0) + 0.2
-			Fdy = 0.5 * np.cos(w * time + phi0) + 0.2 * np.sin(3 * w * time + phi0) + 0.4
-			Fdz = 0.5 * np.sin(w * time + phi0) + 0.2 * np.cos(3 * w * time + phi0) - 0.5
-			
-			dp = 0.5 * np.sin(w * time + phi0) + 0.2 * np.cos(w * time + phi0)
-			dq = 0.5 * np.cos(w * time + phi0) + 0.2 * np.sin(w * time + phi0)
-			dr = 0.5 * np.cos(w * time + phi0) + 0.2 * np.sin(w * time + phi0)
-		elif 5 < time <= 10:
-			Fdx = 1.5
-			Fdy = 0.4 * (time - 5.0)
-			Fdz = -0.6
-			
-			dp = 0.5 * np.sin(w * time + phi0) + 0.2 * np.cos(2 * np.sin(2 * w) * time + phi0)
-			dq = 0.5 * np.cos(1.5 * np.sin(2 * w) * time + phi0) + 0.2 * np.sin(w * time + phi0)
-			dr = 0.5 * np.sign(np.round(time - 5) % 2 - 0.5)
-		else:
-			phi0 = np.pi / 2
-			Fdx = 0.5 * np.sin(np.cos(2 * w) * time + phi0) - 1.0 * np.cos(3 * np.sin(w) * time + phi0)
-			Fdy = 0.5 * np.sign(np.round(time - 10) % 3 - 1.5) + 0.5 * np.sin(2 * w * time + phi0) - 0.4
-			Fdz = 0.5 * np.cos(w * time + phi0) - 1.0 * np.sin(3 * w + time + phi0) + 1.0
-			
-			dp = 0.5 * np.sin(np.sin(2 * w) * time + phi0) + 0.2 * np.cos(w * time + phi0)
-			dq = 1.5 * np.cos(w * time + phi0) + 0.2 * np.sin(w * time + phi0) - 0.7
-			dr = 0.5 * np.cos(2 * w * time + phi0) + 0.6 * np.sin(w * time + phi0)
+		Fdx = 1.5 * np.sin(w * time + phi0) + 0.2 * np.cos(3 * w * time + phi0)
+		Fdy = 1.5 * np.cos(w * time + phi0) + 0.2 * np.sin(3 * w * time + phi0)
+		Fdz = 1.5 * np.sin(w * time + phi0) + 0.2 * np.cos(3 * w * time + phi0)
+		
+		dp = 0.
+		dq = 0.
+		dr = 0.5 * np.cos(w * time + phi0) + 0.2 * np.sin(w * time + phi0)
 		
 		return np.array([Fdx, Fdy, Fdz, dp, dq, dr])
 
