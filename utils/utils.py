@@ -32,9 +32,9 @@ def S(x):
 	return np.sin(x)
 
 
-def uo_2_ref_angle_throttle(uo: np.ndarray, att: np.ndarray, m: float, g: float):
-	phi_d_max = np.pi / 3
-	theta_d_max = np.pi / 3
+def uo_2_ref_angle_throttle(uo: np.ndarray, att: np.ndarray, m: float, g: float,
+							phi_d_old: float, theta_d_old: float, dt:float,
+							att_limit=None, dot_att_limit=None):
 	ux = uo[0]
 	uy = uo[1]
 	uz = uo[2]
@@ -42,13 +42,23 @@ def uo_2_ref_angle_throttle(uo: np.ndarray, att: np.ndarray, m: float, g: float)
 
 	asin_phi_d = np.clip((ux * np.sin(att[2]) - uy * np.cos(att[2])) * m / uf, -1, 1)
 	phi_d = np.arcsin(asin_phi_d)
-	phi_d = np.clip(phi_d, -phi_d_max, phi_d_max)
+	if att_limit is not None:
+		phi_d = np.clip(phi_d, -att_limit[0], att_limit[0])
+
+	dot_phi_d = (phi_d - phi_d_old) / dt
+	if dot_att_limit is not None:
+		dot_phi_d = np.clip(dot_phi_d, -dot_att_limit[0], dot_att_limit[0])
 
 	asin_theta_d = np.clip((ux * np.cos(att[2]) + uy * np.sin(att[2])) * m / (uf * np.cos(phi_d)), -1, 1)
 	theta_d = np.arcsin(asin_theta_d)
-	theta_d = np.clip(theta_d, -theta_d_max, theta_d_max)
+	if att_limit is not None:
+		theta_d = np.clip(theta_d, -att_limit[1], att_limit[1])
+	
+	dot_theta_d = (theta_d - theta_d_old) / dt
+	if dot_att_limit is not None:
+		dot_theta_d = np.clip(dot_theta_d, -dot_att_limit[1], dot_att_limit[1])
 
-	return phi_d, theta_d, uf
+	return phi_d, theta_d, dot_phi_d, dot_theta_d, uf
 
 
 def split_str_2_2d_numpy(s: str, step: int):

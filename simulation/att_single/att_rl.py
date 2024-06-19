@@ -1,11 +1,7 @@
-import os
-import sys
-import datetime
-import time
+import os, sys, platform, datetime, torch
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-import platform
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/../../../")
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/../../")
@@ -17,10 +13,10 @@ from uav.uav import UAV, uav_param
 from utils.ref_cmd import *
 from utils.utils import *
 from utils.collector import data_collector
+from utils.PPOActor import PPOActor_Gaussian
 
 cur_path = os.path.dirname(os.path.abspath(__file__))
 windows = platform.system().lower() == 'windows'
-
 
 '''Parameter list of the quadrotor'''
 DT = 0.01
@@ -42,13 +38,12 @@ uav_param.dt = DT
 uav_param.time_max = 10
 '''Parameter list of the quadrotor'''
 
-
 '''Parameter list of the attitude controller'''
 att_ctrl_param = fntsmc_param(
     k1=np.array([4., 4., 15.]).astype(float),
     k2=np.array([1., 1., 1.5]).astype(float),
     k3=np.array([0.05, 0.05, 0.05]).astype(float),
-    k4=np.array([5, 4, 5]).astype(float),       # 要大
+    k4=np.array([5, 4, 5]).astype(float),  # 要大
     alpha1=np.array([1.01, 1.01, 1.01]).astype(float),
     alpha2=np.array([1.01, 1.01, 1.01]).astype(float),
     dim=3,
@@ -61,41 +56,33 @@ att_ctrl_param = fntsmc_param(
 '''Parameter list of the attitude controller'''
 
 IS_IDEAL = False
-OBSERVER = 'rd3'
+USE_OBS = True
+USE_RL = True
 
 if __name__ == '__main__':
     uav = UAV(uav_param)
     ctrl_in = fntsmc(att_ctrl_param)
-
-    # ref_amplitude = np.array([deg2rad(70), deg2rad(70), np.pi / 2])
-    # ref_period = np.array([5, 5, 4])
-    # ref_bias_a = np.array([0, 0, 0])
-    # ref_bias_phase = np.array([0, np.pi / 2, 0])
-    ref_amplitude = np.array([0.17, 0.17, 0.17])
-    ref_period = np.array([3, 3, 3])
-    ref_bias_a = np.array([0, 0, 0])
-    ref_bias_phase = np.array([0, 0, 0])
-
-    rho_d_all, dot_rho_d_all, dot2_rho_d_all = ref_inner_all(ref_amplitude, ref_period, ref_bias_a, ref_bias_phase, uav.time_max, uav.dt)
-
-    if OBSERVER == 'rd3':
-        '''
-            m 和 n 可以相等，也可以不同。m对应低次，n对应高次。
-        '''
-        observer = rd3(use_freq=True,
-                       omega=np.array([3.5, 3.5, 3.5]),
-                       dim=3,
-                       dt=uav.dt)
-    else:
-        observer = None
-
-    de = np.array([0, 0, 0]).astype(float)
+    observer = rd3(use_freq=True, omega=np.array([4., 4., 4.]), dim=3, dt=uav.dt)
     data_record = data_collector(N=int(uav.time_max / uav.dt))
-
+    
+    actor_path = uav.project_path + 'neural_network/att_good_2/'    # att_good_3 画图最好，但是不适合仿真
+    actor = PPOActor_Gaussian(state_dim=6, action_dim=9)
+    actor.load_state_dict(torch.load(actor_path + 'actor'))
+    
+    uav.load_att_normalizer(actor_path + 'state_norm.csv')
+    base_path = uav.project_path + 'comparative_cost/attitude_single/'
+    
+    ref_amplitude = np.array([deg2rad(70), deg2rad(70), deg2rad(90)])
+    ref_period = np.array([5, 5, 4])
+    ref_bias_a = np.array([0, 0, 0])
+    ref_bias_phase = np.array([0, deg2rad(90), 0])    # 因为 RL 学习的时候把这个固定住了，所以只能用这个初始相位偏置只能是 0
+    
+    rho_d_all, dot_rho_d_all, dot2_rho_d_all = ref_inner_all(ref_amplitude, ref_period, ref_bias_a, ref_bias_phase, uav.time_max, uav.dt)
+    
     while uav.time < uav.time_max:
         if uav.n % int(1 / uav.dt) == 0:
             print('time: %.2f s.' % (uav.n / int(1 / uav.dt)))
-
+        
         '''1. 计算 tk 时刻参考信号 和 生成不确定性'''
         uncertainty = generate_uncertainty(time=uav.time, is_ideal=IS_IDEAL)
         rho_d = rho_d_all[uav.n]
@@ -107,35 +94,40 @@ if __name__ == '__main__':
         e_rho = uav.rho1() - rho_d
         de_rho = uav.dot_rho1() - dot_rho_d
         '''2. 计算 tk 时刻误差信号'''
-
+        
         '''3. 观测器'''
-        if not IS_IDEAL:
+        if USE_OBS:
             syst_dynamic = np.dot(uav.dW(), uav.omega()) + np.dot(uav.W(), uav.A_omega() + np.dot(uav.B_omega(), ctrl_in.control_in))
-            delta_obs, dot_delta_obs = observer.observe(syst_dynamic=syst_dynamic, x=uav.rho1())
+            delta_obs, _ = observer.observe(syst_dynamic=syst_dynamic, x=uav.rho1())
         else:
-            delta_obs, dot_delta_obs = np.zeros(3), np.zeros(3)
+            delta_obs = np.zeros(3)
         '''3. 观测器'''
-
+        
         '''4. 计算控制量'''
+        if USE_RL:
+            _s = np.concatenate((e_rho, de_rho))
+            new_att_ctrl_parma = actor.evaluate(uav.att_state_norm(_s, update=False))
+            hehe = np.array([5, 5, 5, 0, 0, 0, 5, 5, 5]).astype(float)
+            ctrl_in.get_param_from_actor(new_att_ctrl_parma * hehe)
         ctrl_in.control_update_inner(e_rho=e_rho,
-									 dot_e_rho=de_rho,
-									 dd_ref=dot2_rho_d,
-									 W=uav.W(),
-									 dW=uav.dW(),
-									 omega=uav.omega(),
-									 A_omega=uav.A_omega(),
-									 B_omega=uav.B_omega(),
-									 obs=delta_obs,
-									 att_only=True)
+                                     dot_e_rho=de_rho,
+                                     dd_ref=dot2_rho_d,
+                                     W=uav.W(),
+                                     dW=uav.dW(),
+                                     omega=uav.omega(),
+                                     A_omega=uav.A_omega(),
+                                     B_omega=uav.B_omega(),
+                                     obs=delta_obs,
+                                     att_only=True)
         '''4. 计算控制量'''
-
+        
         '''5. 状态更新'''
         action_4_uav = np.array([uav.m * uav.g, ctrl_in.control_in[0], ctrl_in.control_in[1], ctrl_in.control_in[2]])
         uav.rk44(action=action_4_uav, dis=uncertainty, n=1, att_only=True)
         '''5. 状态更新'''
-
+        
         '''6. 数据存储'''
-        if IS_IDEAL:
+        if USE_OBS:
             in_obs_error = np.zeros(3)
         else:
             in_obs_error = observer.obs_error
@@ -162,7 +154,7 @@ if __name__ == '__main__':
             new_path = cur_path + '/../../datasave/att_bs_fntsmc-' + datetime.datetime.strftime(datetime.datetime.now(), '%Y-%m-%d-%H-%M-%S') + '/'
         os.mkdir(new_path)
         data_record.package2file(new_path)
-
+    
     data_record.plot_att()
     data_record.plot_torque()
     data_record.plot_inner_obs()

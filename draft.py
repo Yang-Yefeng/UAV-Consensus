@@ -15,7 +15,12 @@ e = np.array([9,0])
 
 file = './simulation/pos_consensus/global_configuration.xml'
 
-a = np.zeros((5,3))
-b = a[:, 0, None]
-# b = np.concatenate((np.atleast_2d(a[:,0]),np.atleast_2d(a[:,0])), axis=1)
-print(b.shape)
+# a = np.array([1,2,3])
+# b = np.array([0.5,0.5,0.5])
+# print(np.dot(a**2, b))
+
+a = 3
+b = 5
+c = 2
+a += (b * c)
+print(a)

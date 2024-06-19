@@ -82,25 +82,16 @@ class fntsmc:
 		u3 = obs + self.k3 * np.tanh(5 * self.s) + self.k4 * self.sig(self.s, self.alpha2)
 		self.control_out = -(u1 + u2 + u3)
 	
-	def get_param_from_actor(self, action_from_actor: np.ndarray, hehe_flag: bool = True):
+	def get_param_from_actor(self, action_from_actor: np.ndarray):
 		if np.min(action_from_actor) < 0:
 			print('ERROR!!!!')
-		if hehe_flag:
-			for i in range(3):  # 分别对应 k1: 0 1 2, k2: 3 4 5, k4: 6 7 8
-				if action_from_actor[i] > 0:
-					self.k1[i] = action_from_actor[i] * 5
-				if action_from_actor[i + 3] > 0:
-					self.k2[i] = action_from_actor[i + 3]
-				if action_from_actor[i + 6] > 0:
-					self.k4[i] = action_from_actor[i + 6] * 5
-		else:
-			for i in range(3):	# 分别对应 k1: 0 1 2, k2: 3 4 5, k4: 6 7 8
-				if action_from_actor[i] > 0:
-					self.k1[i] = action_from_actor[i]
-				if action_from_actor[i + 3] > 0:
-					self.k2[i] = action_from_actor[i + 3]
-				if action_from_actor[i + 6] > 0:
-					self.k4[i] = action_from_actor[i + 6]
+		for i in range(3):  # 分别对应 k1: 0 1 2, k2: 3 4 5, k4: 6 7 8
+			if action_from_actor[i] > 0:
+				self.k1[i] = action_from_actor[i]
+			if action_from_actor[i + 3] > 0:
+				self.k2[i] = action_from_actor[i + 3]
+			if action_from_actor[i + 6] > 0:
+				self.k4[i] = action_from_actor[i + 6]
 	
 	def fntsmc_reset_with_new_param(self, param: fntsmc_param):
 		self.k1 = param.k1

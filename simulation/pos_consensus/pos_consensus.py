@@ -1,7 +1,4 @@
-import os
-import sys
-import datetime
-import platform
+import os, sys, datetime, platform, torch
 
 # import matplotlib.pyplot as plt
 # import numpy as np
@@ -201,13 +198,16 @@ if __name__ == '__main__':
 			'''2.3 transfer virtual control command to actual throttle, phi_d, and theta_d'''
 			phi_d_old = uavs[i].rho_d[0]
 			theta_d_old = uavs[i].rho_d[1]
-			phi_d, theta_d, throttle = uo_2_ref_angle_throttle(uo=uavs[i].ctrl_pos.control_out_consensus,
-															   att=uavs[i].uav.uav_att(),
-															   m=uavs[i].uav.m,
-															   g=uavs[i].uav.g)
+			phi_d, theta_d, dot_phi_d, dot_theta_d, throttle = uo_2_ref_angle_throttle(uo=uavs[i].ctrl_pos.control_out_consensus,
+																					   att=uavs[i].uav.uav_att(),
+																					   m=uavs[i].uav.m,
+																					   g=uavs[i].uav.g,
+																					   phi_d_old=phi_d_old,
+																					   theta_d_old=theta_d_old,
+																					   dt=uavs[i].uav.dt,
+																					   att_limit=[np.pi / 3, np.pi / 3],
+																					   dot_att_limit=None)	# [np.pi / 2, np.pi / 2]
 			
-			dot_phi_d = (phi_d - phi_d_old) / uavs[i].uav.dt
-			dot_theta_d = (theta_d - theta_d_old) / uavs[i].uav.dt
 			uavs[i].rho_d = np.array([phi_d, theta_d, ref[3]])  # phi_d theta_d psi_d
 			uavs[i].dot_rho_d = np.array([dot_phi_d, dot_theta_d, dot_ref[3]])  # phi_d theta_d psi_d 的一阶导数
 			uavs[i].throttle = throttle

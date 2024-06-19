@@ -11,7 +11,7 @@ from utils.utils import *
 
 if __name__ == '__main__':
     cur_path = os.path.dirname(os.path.abspath(__file__))
-    base_dir = cur_path + '/pos_consensus-2024-06-09-17-53-04/'  # select the directory
+    base_dir = cur_path + '/pos_consensus_rl/'  # select the directory
     data_record = []
     pos_record = []
     uav_num = len(os.listdir(base_dir))     # check the number of the uav

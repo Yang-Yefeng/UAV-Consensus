@@ -128,7 +128,8 @@ class UAV:
 		self.R_pos = np.array([0.0, 0.0, 0.0])
 		
 		self.project_path = os.path.dirname(os.path.abspath(__file__)) + '/../'
-		self.state_norm = Normalization(6)
+		self.pos_state_norm = Normalization(6)
+		self.att_state_norm = Normalization(6)
 	
 	def ode(self, xx: np.ndarray, dis: np.ndarray):
 		"""
@@ -341,16 +342,27 @@ class UAV:
 	def B_omega(self):
 		return self.J_inv()
 	
-	def load_norm_normalizer_from_file(self, file):
+	def load_pos_normalizer(self, file):
 		data = pd.read_csv(file, header=0).to_numpy()
-		self.state_norm.running_ms.n = data[0, 0]
-		self.state_norm.running_ms.mean = data[:, 1]
-		self.state_norm.running_ms.std = data[:, 2]
-		self.state_norm.running_ms.S = data[:, 3]
-		self.state_norm.running_ms.n = data[0, 4]
-		self.state_norm.running_ms.mean = data[:, 5]
-		self.state_norm.running_ms.std = data[:, 6]
-		self.state_norm.running_ms.S = data[:, 7]
+		self.pos_state_norm.running_ms.n = data[0, 0]
+		self.pos_state_norm.running_ms.mean = data[:, 1]
+		self.pos_state_norm.running_ms.std = data[:, 2]
+		self.pos_state_norm.running_ms.S = data[:, 3]
+		self.pos_state_norm.running_ms.n = data[0, 4]
+		self.pos_state_norm.running_ms.mean = data[:, 5]
+		self.pos_state_norm.running_ms.std = data[:, 6]
+		self.pos_state_norm.running_ms.S = data[:, 7]
+	
+	def load_att_normalizer(self, file):
+		data = pd.read_csv(file, header=0).to_numpy()
+		self.att_state_norm.running_ms.n = data[0, 0]
+		self.att_state_norm.running_ms.mean = data[:, 1]
+		self.att_state_norm.running_ms.std = data[:, 2]
+		self.att_state_norm.running_ms.S = data[:, 3]
+		self.att_state_norm.running_ms.n = data[0, 4]
+		self.att_state_norm.running_ms.mean = data[:, 5]
+		self.att_state_norm.running_ms.std = data[:, 6]
+		self.att_state_norm.running_ms.S = data[:, 7]
 	
 	def get_reward_att(self, r, dr, acc):
 		_e_att = self.uav_att() - r
