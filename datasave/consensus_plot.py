@@ -11,7 +11,7 @@ from utils.utils import *
 
 if __name__ == '__main__':
     cur_path = os.path.dirname(os.path.abspath(__file__))
-    base_dir = cur_path + '/pos_consensus_rl/'  # select the directory
+    base_dir = cur_path + '/pos_consensus-RL-group3/'  # select the directory
     data_record = []
     pos_record = []
     uav_num = len(os.listdir(base_dir))     # check the number of the uav
@@ -28,7 +28,7 @@ if __name__ == '__main__':
     zbound = np.array([int(np.min(pos_record[:, :, 2])) - 1, int(np.max(pos_record[:, :, 2])) + 1])
 
     fig = plt.figure(figsize=(9, 9))
-    ax = axes3d.Axes3D(fig)
+    ax = plt.axes(projection='3d')
     ax.set_aspect('auto')
 
     ax.set_xlim3d(xbound)
