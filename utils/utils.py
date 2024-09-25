@@ -2,6 +2,8 @@ import numpy as np
 from utils.XML_Operation import *
 from utils.collector import data_collector
 from controller.FNTSMC import fntsmc_param
+from controller.RFNTSMC import rfntsmc_param
+from controller.FTPD import ftpd_param
 import matplotlib.pyplot as plt
 from utils.XML_Operation import *
 
@@ -136,6 +138,38 @@ def get_pos_ctrl_param_from_XML(root: ET.Element) -> fntsmc_param:
 	_param.dt = float(tag_value['dt'])
 	return _param
 
+def get_pos_rfntsmc_ctrl_param_from_XML(root: ET.Element) -> rfntsmc_param:
+	_param = rfntsmc_param()
+	tag_value = XML_GetTagValue(XML_FindNode('pos_rfntsmc_ctrl_param', root))
+	_param.k1 = split_str_2_1d_numpy(tag_value['k1'])
+	_param.k2 = split_str_2_1d_numpy(tag_value['k2'])
+	_param.alpha = split_str_2_1d_numpy(tag_value['alpha'])
+	_param.beta = split_str_2_1d_numpy(tag_value['beta'])
+	_param.gamma = split_str_2_1d_numpy(tag_value['gamma'])
+	_param.lmd = split_str_2_1d_numpy(tag_value['lmd'])
+	_param.dim = int(tag_value['dim'])
+	_param.dt = float(tag_value['dt'])
+	return _param
+
+def get_pos_ftpd_ctrl_param_from_XML(root: ET.Element) -> ftpd_param:
+	_param = ftpd_param()
+	tag_value = XML_GetTagValue(XML_FindNode('pos_ftpd_ctrl_param', root))
+
+	_param.kp_pos = split_str_2_1d_numpy(tag_value['kp_pos'])
+	_param.ki_pos = split_str_2_1d_numpy(tag_value['ki_pos'])
+	_param.kd_pos = split_str_2_1d_numpy(tag_value['kd_pos'])
+	_param.kp_vel = split_str_2_1d_numpy(tag_value['kp_vel'])
+	_param.ki_vel = split_str_2_1d_numpy(tag_value['ki_vel'])
+	_param.kd_vel = split_str_2_1d_numpy(tag_value['kd_vel'])
+	_param.kp_att = split_str_2_1d_numpy(tag_value['kp_att'])
+	_param.ki_att = split_str_2_1d_numpy(tag_value['ki_att'])
+	_param.kd_att = split_str_2_1d_numpy(tag_value['kd_att'])
+	_param.p_v = split_str_2_1d_numpy(tag_value['p_v'])
+	_param.p_a = split_str_2_1d_numpy(tag_value['p_a'])
+	_param.p_r = split_str_2_1d_numpy(tag_value['p_r'])
+	_param.dim = int(tag_value['dim'])
+	_param.dt = float(tag_value['dt'])
+	return _param
 
 def plot_consensus_pos(data_block: list):
 	num = len(data_block)

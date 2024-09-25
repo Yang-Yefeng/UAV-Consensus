@@ -116,6 +116,16 @@ class robust_differentiator_3rd:
         self.dz3 = (kappa * self.m3 * self.sig(self.obs_error, self.a3) +
                     (1 - kappa) * self.n3 * self.sig(self.obs_error, self.b3))
 
+        # self.dz1 = (self.z2 +
+        #             self.m1 * self.sig(self.obs_error, self.a1) +
+        #             self.n1 * self.sig(self.obs_error, self.b1))
+        # self.dz2 = (syst_dynamic +
+        #             self.z3 +
+        #             self.m2 * self.sig(self.obs_error, self.a2) +
+        #             self.n2 * self.sig(self.obs_error, self.b2))
+        # self.dz3 = (self.m3 * self.sig(self.obs_error, self.a3) +
+        #             self.n3 * self.sig(self.obs_error, self.b3))
+
         self.z1 = self.z1 + self.dz1 * self.dt
         self.z2 = self.z2 + self.dz2 * self.dt
         self.z3 = self.z3 + self.dz3 * self.dt

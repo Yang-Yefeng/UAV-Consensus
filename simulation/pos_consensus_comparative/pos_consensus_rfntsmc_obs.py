@@ -1,4 +1,6 @@
-import os, sys, datetime, platform, torch
+import os, sys, datetime, platform
+
+import numpy as np
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/../../../")
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/../../")
@@ -8,7 +10,6 @@ from observer.RobustDifferentatior_3rd import robust_differentiator_3rd as rd3
 from uav.uav_consensus import usv_consensus, uav_param
 from utils.ref_cmd import *
 from utils.utils import *
-from utils.PPOActor import PPOActor_Gaussian
 from consensus_uncertainty import *
 
 os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
@@ -41,21 +42,26 @@ att_ctrl_param.dt = g_v['dt']
 6. k4-alpha2 的组合要比 k2-alpha1 大，但是也别太大
 '''
 
-pos_ctrl_param = get_pos_ctrl_param_from_XML(config_root)
+pos_ctrl_param = get_pos_rfntsmc_ctrl_param_from_XML(config_root)
 pos_ctrl_param.dt = g_v['dt']
 
-TEST_GROUP = 3
+TEST_GROUP = 2
 if TEST_GROUP == 0:
     # 第一组 大圈逆时针，小圈不动
-    ref_amplitude = np.array([1, 1, 0.5, np.pi / 2])  # x y z psi
-    ref_period = np.array([5, 5, 4, 5])
-    ref_bias_a = np.array([0, 0, 1.0, 0])
-    ref_bias_phase = np.array([np.pi / 2, 0, 0, 0])
+    ref_amplitude = np.array([5, 5, 1, np.pi / 2])  # x y z psi
+    ref_period = np.array([10, 10, 5, 10])
+    ref_bias_a = np.array([2, 3, 2.0, 0])
+    ref_bias_phase = np.array([0, np.pi / 2, 0, 0])
 
-    offset_amplitude = np.array([[0., 0., 0.], [0., 0., 0.], [0., 0., 0.], [0., 0., 0.]])
-    offset_period = np.array([[5, 5, 4], [5, 5, 4], [5, 5, 4], [5, 5, 4]])
-    offset_bias_a = np.array([[0.5, 0, 0], [0, 0.5, 0], [-0.5, 0., 0.], [0., -0.5, 0.]])
-    offset_bias_phase = np.array([[0., 0., 0.], [0., 0., 0.], [0., 0., 0.], [0., 0., 0.]])
+    rv = 2.0
+    t0 = np.pi / 3
+    offset_amplitude = np.array([[0., 0., 0.], [0., 0., 0.], [0., 0., 0.], [0., 0., 0.], [0., 0., 0.], [0., 0., 0.]])
+    offset_period = np.array([[5, 5, 4], [5, 5, 4], [5, 5, 4], [5, 5, 4], [5, 5, 4], [5, 5, 4]])
+    offset_bias_a = np.array([[rv, 0, 0], [rv * np.sin(t0), rv * np.cos(t0), 0], [-rv * np.sin(t0), rv * np.cos(t0), 0],
+                              [-rv, 0, 0], [-rv * np.sin(t0), -rv * np.cos(t0), 0], [rv * np.sin(t0), -rv * np.cos(t0), 0]])
+    offset_bias_phase = np.array([[0., 0., 0.], [0., 0., 0.], [0., 0., 0.], [0., 0., 0.], [0., 0., 0.], [0., 0., 0.]])
+    pos0 = np.array([[rv, 0, 0], [rv * np.sin(t0), rv * np.cos(t0), 0], [-rv * np.sin(t0), rv * np.cos(t0), 0],
+                     [-rv, 0, 0], [-rv * np.sin(t0), -rv * np.cos(t0), 0], [rv * np.sin(t0), -rv * np.cos(t0), 0]])
 elif TEST_GROUP == 1:
     # 第二组 整体平移，小圈不动
     ref_amplitude = np.array([0, 0, 0, 0])  # x y z psi
@@ -67,28 +73,43 @@ elif TEST_GROUP == 1:
     offset_period = np.array([[5, 5, 4], [5, 5, 4], [5, 5, 4], [5, 5, 4]])
     offset_bias_a = np.array([[0.5, 0, 0], [0, 0.5, 0], [-0.5, 0., 0.], [0., -0.5, 0.]])
     offset_bias_phase = np.array([[0., 0., 0.], [0., 0., 0.], [0., 0., 0.], [0., 0., 0.]])
+    pos0 = np.array([[], [], [], [], [], []])
 elif TEST_GROUP == 2:
     # 第三组 大圈逆时针，小圈逆时针
-    ref_amplitude = np.array([1, 1, 0.5, np.pi / 2])  # x y z psi
-    ref_period = np.array([10, 10, 8, 10])
-    ref_bias_a = np.array([0, 0, 1.0, 0])
-    ref_bias_phase = np.array([np.pi / 2, 0, 0, 0])
+    ref_amplitude = np.array([5, 5, 1, np.pi / 2])  # x y z psi
+    ref_period = np.array([5, 5, 5, 10])
+    ref_bias_a = np.array([2, 3, 2.0, 0])
+    ref_bias_phase = np.array([0, np.pi / 2, 0, 0])
 
-    offset_amplitude = np.array([[0.5, 0.5, 0.], [0.5, 0.5, 0.], [0.5, 0.5, 0.], [0.5, 0.5, 0.]])
-    offset_period = np.array([[5, 5, 4], [5, 5, 4], [5, 5, 4], [5, 5, 4]])
-    offset_bias_a = np.array([[0., 0., 0], [0., 0., 0], [0., 0., 0.], [0., 0., 0.]])
-    offset_bias_phase = np.array([[np.pi / 2, 0., 0.], [np.pi, np.pi / 2, 0.], [-np.pi / 2, np.pi, 0.], [0., -np.pi / 2, 0.]])
+    rv = 2.0
+    t0 = np.pi / 3
+    offset_amplitude = np.array([[2, 2, 0.], [2, 2, 0.], [2, 2, 0.], [2, 2, 0.], [2, 2, 0.], [2, 2, 0.]])
+    offset_period = np.array([[10, 10, 10], [10, 10, 10], [10, 10, 10], [10, 10, 10], [10, 10, 10], [10, 10, 10]])
+    offset_bias_a = np.array([[0., 0., 0.], [0., 0., 0.], [0., 0., 0.], [0., 0., 0.], [0., 0., 0.], [0., 0., 0.]])
+    offset_bias_phase = np.array([[np.pi / 2 + (1 - 1) * t0, (1 - 1) * t0, 0.],
+                                  [np.pi / 2 + (2 - 1) * t0, (2 - 1) * t0, 0.],
+                                  [np.pi / 2 + (3 - 1) * t0, (3 - 1) * t0, 0.],
+                                  [np.pi / 2 + (4 - 1) * t0, (4 - 1) * t0, 0.],
+                                  [np.pi / 2 + (5 - 1) * t0, (5 - 1) * t0, 0.],
+                                  [np.pi / 2 + (6 - 1) * t0, (6 - 1) * t0, 0.]])
+    pos0 = np.array([[rv, 0, 0], [rv * np.sin(t0), rv * np.cos(t0), 0], [-rv * np.sin(t0), rv * np.cos(t0), 0],
+                     [-rv, 0, 0], [-rv * np.sin(t0), -rv * np.cos(t0), 0], [rv * np.sin(t0), -rv * np.cos(t0), 0]])
 elif TEST_GROUP == 3:
     # 第四组 大圈8字，小圈不动
-    ref_amplitude = np.array([1, 1, 0.5, np.pi / 2])  # x y z psi
-    ref_period = np.array([10, 10, 8, 10])
-    ref_bias_a = np.array([0, 0, 1.0, 0])
+    ref_amplitude = np.array([5, 2.5, 1, np.pi / 2])  # x y z psi
+    ref_period = np.array([10, 10, 5, 10])
+    ref_bias_a = np.array([2, 3, 2.0, 0])
     ref_bias_phase = np.array([0, 0, 0, 0])
 
-    offset_amplitude = np.array([[0., 0., 0.], [0., 0., 0.], [0., 0., 0.], [0., 0., 0.]])
-    offset_period = np.array([[5, 5, 4], [5, 5, 4], [5, 5, 4], [5, 5, 4]])
-    offset_bias_a = np.array([[0.5, 0, 0], [0, 0.5, 0], [-0.5, 0., 0.], [0., -0.5, 0.]])
-    offset_bias_phase = np.array([[0., 0., 0.], [0., 0., 0.], [0., 0., 0.], [0., 0., 0.]])
+    rv = 2.0
+    t0 = np.pi / 3
+    offset_amplitude = np.array([[0., 0., 0.], [0., 0., 0.], [0., 0., 0.], [0., 0., 0.], [0., 0., 0.], [0., 0., 0.]])
+    offset_period = np.array([[5, 5, 4], [5, 5, 4], [5, 5, 4], [5, 5, 4], [5, 5, 4], [5, 5, 4]])
+    offset_bias_a = np.array([[rv, 0, 0], [rv * np.sin(t0), rv * np.cos(t0), 0], [-rv * np.sin(t0), rv * np.cos(t0), 0],
+                              [-rv, 0, 0], [-rv * np.sin(t0), -rv * np.cos(t0), 0], [rv * np.sin(t0), -rv * np.cos(t0), 0]])
+    offset_bias_phase = np.array([[0., 0., 0.], [0., 0., 0.], [0., 0., 0.], [0., 0., 0.], [0., 0., 0.], [0., 0., 0.]])
+    pos0 = np.array([[rv, 0, 0], [rv * np.sin(t0), rv * np.cos(t0), 0], [-rv * np.sin(t0), rv * np.cos(t0), 0],
+                     [-rv, 0, 0], [-rv * np.sin(t0), -rv * np.cos(t0), 0], [rv * np.sin(t0), -rv * np.cos(t0), 0]])
 else:
     # 不动
     ref_amplitude = np.zeros(4)
@@ -100,12 +121,10 @@ else:
     offset_period = np.zeros((4, 4))
     offset_bias_a = np.zeros((4, 4))
     offset_bias_phase = np.zeros((4, 4))
+    pos0 = np.array([[], [], [], [], [], []])
 
 '''uav group initialization'''
-USE_RL = True
-actor_path = os.path.dirname(os.path.abspath(__file__)) + '/../../neural_network/pos_maybe_good_1/'  # pos_maybe_good_3 用于定点
-actor = PPOActor_Gaussian(state_dim=6, action_dim=9)
-actor.load_state_dict(torch.load(actor_path + 'actor'))
+USE_OBS = True
 
 uavs = []
 for i in range(g_v['uav_num']):
@@ -122,7 +141,7 @@ for i in range(g_v['uav_num']):
                             obs_att=obs_in,
                             obs_pos=obs_out,
                             is_ideal=g_v['g_ideal'])
-    uav_con.uav.load_pos_normalizer(actor_path + 'state_norm.csv')
+    uav_con.uav.set_pos0(pos0[i])
     base_path = uav_con.uav.project_path + 'comparative_cost/position_single/'
     uavs.append(uav_con)
 '''uav group initialization'''
@@ -155,10 +174,10 @@ if __name__ == '__main__':
         REF, DOT_REF, DOT2_REF = ref_uav_sequence(g_v['dt'], g_v['g_tm'], ref_amplitude, ref_period, ref_bias_a, ref_bias_phase)
     NU, DOT_NU, DOT2_NU = offset_uav_n_sequence(g_v['dt'], g_v['g_tm'], offset_amplitude, offset_period, offset_bias_a, offset_bias_phase)
 
-    '''初始化一下，没啥用，放着'''
-    for i in range(g_v['uav_num']):
-        uavs[i].reset(uav_par, att_ctrl_param, pos_ctrl_param)
-    '''初始化一下，没啥用，放着'''
+    # '''初始化一下，没啥用，放着'''
+    # for i in range(g_v['uav_num']):
+    #     uavs[i].reset(uav_par, att_ctrl_param, pos_ctrl_param)
+    # '''初始化一下，没啥用，放着'''
 
     while g_v['g_t'] < g_v['g_tm'] - g_v['dt'] / 2:
         '''嗨嗨嗨'''
@@ -191,35 +210,36 @@ if __name__ == '__main__':
             dot_eta_d_i = dot_ref[0: 3]  # dot 表示一阶导数，eta表示外环，d表示参考，i表示无人机编号
             dotdot_eta_d_i = dot2_ref[0: 3]
 
-            if not uavs[i].is_ideal:
+            if USE_OBS:
                 syst_dynamic_i = -uavs[i].uav.kt / uavs[i].uav.m * uavs[i].uav.dot_eta() + uavs[i].uav.A()
                 obs_eta_i, _ = uavs[i].obs_pos.observe(x=uavs[i].uav.eta(), syst_dynamic=syst_dynamic_i)
             else:
                 obs_eta_i = np.zeros(3)
 
             '''2.2 consensus control update'''
-            uavs[i].cal_consensus_e(g_eta, nu, nu[i], eta_d_i)  # 计算 e
+            uavs[i].cal_consensus_e(g_eta, nu, nu[i], eta_d_i, sat=True, thresh=np.array([2.5, 2.5, 2.8]))  # 计算 e
             uavs[i].cal_consensus_dot_e(g_dot_eta, dot_nu, dot_nu[i], dot_eta_d_i)  # 计算 de
             Lambda_eta = uavs[i].cal_Lambda_eta(g_2nd_dynamics, dot2_nu[i], dotdot_eta_d_i)
 
             uavs[i].calculate_cost(eta_d_i, nu[i], dot_eta_d_i, dot_nu[i])
 
-            if USE_RL:
-                _s = np.concatenate((uavs[i].consensus_e, uavs[i].consensus_dot_e))
-                new_pos_ctrl_parma = actor.evaluate(uavs[i].uav.pos_state_norm(_s, update=False))
-                hehe = np.array([0, 0, 0, 0, 0, 0, 5, 5, 5]).astype(float)
-                uavs[i].ctrl_pos.get_param_from_actor(new_pos_ctrl_parma * hehe)
             uavs[i].ctrl_pos.control_update_outer_consensus(d=uavs[i].d,
                                                             b=uavs[i].b,
                                                             a=uavs[i].adjacency,
-                                                            kt=uavs[i].uav.kt,
-                                                            m=uavs[i].uav.m,
                                                             consensus_e=uavs[i].consensus_e,
                                                             consensus_de=uavs[i].consensus_dot_e,
                                                             Lambda_eta=Lambda_eta,
-                                                            dot_eta=uavs[i].uav.dot_eta(),
+                                                            ref=ref[0:3],
+                                                            d_ref = dot_ref[0:3],
+                                                            dd_ref=dot2_ref[0:3],
+                                                            nu=nu[i],
+                                                            d_nu=dot_nu[i],
+                                                            dd_nu=dot2_nu[i],
                                                             obs=obs_eta_i,
-                                                            g_obs=g_obs)
+                                                            g_obs=g_obs,
+                                                            e_max=np.array([10, 10, 10]),
+                                                            dot_e_max=np.array([10, 10, 10])
+                                                            )
 
             '''2.3 transfer virtual control command to actual throttle, phi_d, and theta_d'''
             phi_d_old = uavs[i].rho_d[0]
@@ -231,8 +251,8 @@ if __name__ == '__main__':
                                                                                        phi_d_old=phi_d_old,
                                                                                        theta_d_old=theta_d_old,
                                                                                        dt=uavs[i].uav.dt,
-                                                                                       att_limit=[np.pi / 3, np.pi / 3],
-                                                                                       dot_att_limit=None)  # [np.pi / 2, np.pi / 2]
+                                                                                       att_limit=[np.pi / 3, np.pi / 3], #
+                                                                                       dot_att_limit=[np.pi / 2, np.pi / 2])  # None
 
             uavs[i].rho_d = np.array([phi_d, theta_d, ref[3]])  # phi_d theta_d psi_d
             uavs[i].dot_rho_d = np.array([dot_phi_d, dot_theta_d, dot_ref[3]])  # phi_d theta_d psi_d 的一阶导数
@@ -242,7 +262,7 @@ if __name__ == '__main__':
             e_rho_i = uavs[i].uav.rho1() - uavs[i].rho_d
             de_rho_i = np.dot(uavs[i].uav.W(), uavs[i].uav.rho2()) - uavs[i].dot_rho_d
 
-            if not uavs[i].is_ideal:
+            if USE_OBS:
                 syst_dynamic = (np.dot(uavs[i].uav.dW(), uavs[i].uav.omega()) +
                                 np.dot(uavs[i].uav.W(), uavs[i].uav.A_omega() +
                                        np.dot(uavs[i].uav.B_omega(), uavs[i].ctrl_att.control_in)))

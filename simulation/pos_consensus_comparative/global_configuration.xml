@@ -5,15 +5,15 @@
         <dt>0.01</dt>                   <!--global sampling period-->
         <g_t>0.</g_t>                   <!--global time-->
         <g_N>0</g_N>                    <!--global index-->
-        <g_tm>60</g_tm>                 <!--global maximum simulation time-->
+        <g_tm>40</g_tm>                 <!--global maximum simulation time-->
         <g_ideal>0</g_ideal>            <!--global ideal-->
         <g_obs_in>'rd3'</g_obs_in>      <!--inner-loop observer-->
         <g_obs_out>'rd3'</g_obs_out>    <!--outer-loop observer-->
-        <uav_num>4</uav_num>            <!--number of UAV-->
+        <uav_num>6</uav_num>            <!--number of UAV-->
 
-        <g_A>[[0, 0, 0, 0], [1, 0, 0, 0], [1, 0, 0, 0], [1, 0, 0, 0]]</g_A>     <!-- adjacent matrix -->
-        <g_D>[0, 1, 1, 1]</g_D>         <!--in-degree-->
-        <g_B>[1, 0, 0, 0]</g_B>         <!--communication-->
+        <g_A>[[0, 0, 0, 0, 0, 0], [1, 0, 0, 0, 0, 0], [0, 1, 0, 1, 0, 0], [1, 0, 0, 0, 0, 0], [0, 0, 0, 1, 0, 0], [0, 0, 0, 0, 1, 0]]</g_A>     <!-- adjacent matrix -->
+        <g_D>[0, 1, 2, 1, 1, 1]</g_D>         <!--in-degree-->
+        <g_B>[1, 0, 0, 0, 0, 0]</g_B>         <!--communication-->
 
 <!--        <g_A>[[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]]</g_A>     &lt;!&ndash; adjacent matrix &ndash;&gt;-->
 <!--        <g_D>[0, 0, 0, 0]</g_D>         &lt;!&ndash;in-degree&ndash;&gt;-->
@@ -42,7 +42,7 @@
         <angle0>[0, 0, 0]</angle0>
         <pqr0>[0, 0, 0]</pqr0>
         <dt>0.01</dt>
-        <time_max>60</time_max>
+        <time_max>40</time_max>
     </uav_param>
 
     <att_ctrl_param>
@@ -63,39 +63,56 @@
     </att_ctrl_param>
 
     <pos_ctrl_param>
+        <!-- 最好的 -->
         <k1>[0.3, 0.3, 1.0]</k1>
         <k2>[0.5, 0.5, 1]</k2>
 <!--        <k3>[0.05, 0.05, 0.05]</k3>-->
-        <k3>[3, 3, 3]</k3>
+        <k3>[3, 3, 20]</k3>
         <k4>[6, 6, 6]</k4>
+        <!-- 最好的 -->
+
+<!--        <k1>[0.3, 0.3, 1.0]</k1>-->
+<!--        <k2>[1, 1, 1]</k2>-->
+<!--&lt;!&ndash;        <k3>[0.05, 0.05, 0.05]</k3>&ndash;&gt;-->
+<!--        <k3>[0.8, 0.8, 0.8]</k3>-->
+<!--        <k4>[2, 2, 2]</k4>-->
+
         <alpha1>[1.8, 1.8, 1.8]</alpha1>
         <alpha2>[1.01, 1.01, 1.01]</alpha2>
         <dim>3</dim>
         <dt>0.01</dt>
     </pos_ctrl_param>
 
-<!--    <ref_trajectory>-->
-<!--        <ref_amplitude>[1, 1, 0.5, np.pi / 2]</ref_amplitude> &lt;!&ndash; 参考轨迹振幅 &ndash;&gt;-->
-<!--        <ref_period>[5, 5, 4, 5]</ref_period>                 &lt;!&ndash; 参考轨迹周期 &ndash;&gt;-->
-<!--        <ref_bias_a>[0, 0, 1.0, 0]</ref_bias_a>               &lt;!&ndash; 参考轨迹幅值偏置 &ndash;&gt;-->
-<!--        <ref_bias_phase>[np.pi / 2, 0, 0, 0]</ref_bias_phase> &lt;!&ndash; 参考轨迹相位偏置 &ndash;&gt;-->
-<!--    </ref_trajectory>-->
+    <pos_rfntsmc_ctrl_param>
+        <k1>[1.2, 0.8, 1.5]</k1>
+        <k2>[0.2, 0.6, 1.5]</k2>
+        <alpha>[1.2, 1.5, 1.2]</alpha>
+        <beta>[0.3, 0.3, 0.3]</beta>
+        <gamma>[0.2, 0.2, 0.2]</gamma>
+        <lmd>[2.0, 2.0, 2.0]</lmd>
+        <dim>3</dim>
+        <dt>0.01</dt>
+    </pos_rfntsmc_ctrl_param>
 
-<!--    <att_observer>-->
-<!--        <use_freq>1</use_freq>-->
-<!--        <omega>[3.5, 3.4, 10]</omega>-->
-<!--        <dim>3</dim>-->
-<!--        <use_freq>1</use_freq>-->
-<!--        <thresh>[0.5, 0.5, 0.5]</thresh>-->
-<!--        <dt>0.01</dt>-->
-<!--    </att_observer>-->
+    <pos_ftpd_ctrl_param>
+        <kp_pos>[5.,5.,7.5]</kp_pos>
+        <ki_pos>[0.05, 0.05, 1.2]</ki_pos>
+        <kd_pos>[3.,3.,3]</kd_pos>
 
-<!--    <pos_observer>-->
-<!--        <use_freq>1</use_freq>-->
-<!--        <omega>[4, 4, 4]</omega>-->
-<!--        <dim>3</dim>-->
-<!--        <use_freq>1</use_freq>-->
-<!--        <thresh>[0.5, 0.5, 0.5]</thresh>-->
-<!--        <dt>0.01</dt>-->
-<!--    </pos_observer>-->
+        <kp_vel>[0., 0., 0.]</kp_vel>
+        <ki_vel>[0., 0., 0.]</ki_vel>
+        <kd_vel>[0., 0., 0.]</kd_vel>
+
+        <kp_att>[0., 0., 0.]</kp_att>
+        <ki_att>[0., 0., 0.]</ki_att>
+        <kd_att>[0., 0., 0.]</kd_att>
+
+        <p_v>[0.75, 0.75, 0.8]</p_v>
+        <p_a>[1.0, 1.0, 1.0]</p_a>
+        <p_r>[1.0, 1.0, 1.0]</p_r>
+
+        <dim>3</dim>
+        <dt>0.01</dt>
+    </pos_ftpd_ctrl_param>
+
 </global_initialization>
