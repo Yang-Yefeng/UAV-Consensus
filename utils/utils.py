@@ -4,6 +4,7 @@ from utils.collector import data_collector
 from controller.FNTSMC import fntsmc_param
 from controller.RFNTSMC import rfntsmc_param
 from controller.FTPD import ftpd_param
+from controller.PdT_FNTSMC import pdt_fntsmc_param
 import matplotlib.pyplot as plt
 from utils.XML_Operation import *
 
@@ -125,6 +126,29 @@ def get_att_ctrl_param_from_XML(root: ET.Element) -> fntsmc_param:
 	return _param
 
 
+def get_att_pdt_fntsmc_param_from_XML(root: ET.Element) -> pdt_fntsmc_param:
+	_param = pdt_fntsmc_param()
+	tag_value = XML_GetTagValue(XML_FindNode('att_pdt_fntsmc_ctrl_param', root))
+	
+	_param.a_s = split_str_2_1d_numpy(tag_value['alpha_s'])
+	_param.b1_s = split_str_2_1d_numpy(tag_value['beta1_s'])
+	_param.b2_s = split_str_2_1d_numpy(tag_value['beta3_s'])
+	_param.b3_s = split_str_2_1d_numpy(tag_value['beta3_s'])
+	_param.Ts = split_str_2_1d_numpy(tag_value['Ts'])
+	_param.k1_s = split_str_2_1d_numpy(tag_value['kappa1_s'])
+	
+	_param.a_c = split_str_2_1d_numpy(tag_value['alpha_c'])
+	_param.b1_c = split_str_2_1d_numpy(tag_value['beta1_c'])
+	_param.b2_c = split_str_2_1d_numpy(tag_value['beta3_c'])
+	_param.b3_c = split_str_2_1d_numpy(tag_value['beta3_c'])
+	_param.Tc = split_str_2_1d_numpy(tag_value['Tc'])
+	_param.k1_c = split_str_2_1d_numpy(tag_value['kappa1_c'])
+	
+	_param.dim = int(tag_value['dim'])
+	_param.dt = float(tag_value['dt'])
+	return _param
+
+
 def get_pos_ctrl_param_from_XML(root: ET.Element) -> fntsmc_param:
 	_param = fntsmc_param()
 	tag_value = XML_GetTagValue(XML_FindNode('pos_ctrl_param', root))
@@ -170,6 +194,30 @@ def get_pos_ftpd_ctrl_param_from_XML(root: ET.Element) -> ftpd_param:
 	_param.dim = int(tag_value['dim'])
 	_param.dt = float(tag_value['dt'])
 	return _param
+
+
+def get_pos_pdt_fntsmc_param_from_XML(root: ET.Element) -> pdt_fntsmc_param:
+	_param = pdt_fntsmc_param()
+	tag_value = XML_GetTagValue(XML_FindNode('pos_pdt_fntsmc_ctrl_param', root))
+	
+	_param.a_s = split_str_2_1d_numpy(tag_value['alpha_s'])
+	_param.b1_s = split_str_2_1d_numpy(tag_value['beta1_s'])
+	_param.b2_s = split_str_2_1d_numpy(tag_value['beta3_s'])
+	_param.b3_s = split_str_2_1d_numpy(tag_value['beta3_s'])
+	_param.Ts = split_str_2_1d_numpy(tag_value['Ts'])
+	_param.k1_s = split_str_2_1d_numpy(tag_value['kappa1_s'])
+	
+	_param.a_c = split_str_2_1d_numpy(tag_value['alpha_c'])
+	_param.b1_c = split_str_2_1d_numpy(tag_value['beta1_c'])
+	_param.b2_c = split_str_2_1d_numpy(tag_value['beta3_c'])
+	_param.b3_c = split_str_2_1d_numpy(tag_value['beta3_c'])
+	_param.Tc = split_str_2_1d_numpy(tag_value['Tc'])
+	_param.k1_c = split_str_2_1d_numpy(tag_value['kappa1_c'])
+	
+	_param.dim = int(tag_value['dim'])
+	_param.dt = float(tag_value['dt'])
+	return _param
+
 
 def plot_consensus_pos(data_block: list):
 	num = len(data_block)

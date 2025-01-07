@@ -16,7 +16,7 @@ from utils.collector import data_collector
 from utils.PPOActor import PPOActor_Gaussian
 
 '''Parameter list of the quadrotor'''
-DT = 0.01
+DT = 0.001
 uav_param = uav_param()
 uav_param.m = 0.8
 uav_param.g = 9.8
@@ -32,7 +32,7 @@ uav_param.vel0 = np.array([0, 0, 0])
 uav_param.angle0 = np.array([0, 0, 0])
 uav_param.pqr0 = np.array([0, 0, 0])
 uav_param.dt = DT
-uav_param.time_max = 10
+uav_param.time_max = 60
 '''Parameter list of the quadrotor'''
 
 '''Parameter list of the attitude controller'''
@@ -61,7 +61,7 @@ att_ctrl_param = fntsmc_param(
 pos_ctrl_param = fntsmc_param(
     k1=np.array([0.3, 0.3, 1.0]),
     k2=np.array([0.5, 0.5, 1]),
-    k3=np.array([0.05, 0.05, 0.05]),  # 补偿观测器的，小点就行
+    k3=np.array([3, 3, 3]),  # 补偿观测器的，小点就行
     k4=np.array([6, 6, 6]),
     alpha1=np.array([1.01, 1.01, 1.01]),
     alpha2=np.array([1.01, 1.01, 1.01]),
@@ -118,6 +118,21 @@ if __name__ == '__main__':
             print('time: %.2f s.' % (uav.n / int(1 / uav.dt)))
         
         '''1. generate reference command and uncertainty'''
+        if uav.time < uav.time_max / 3:
+            ref_amplitude = np.array([2, 2, 1, deg2rad(90)])  # x y z psi
+            ref_period = np.array([5, 5, 5, 5])
+            ref_bias_a = np.array([2, 2, 1, 0])
+            ref_bias_phase = np.array([deg2rad(90), 0, 0, 0])
+        elif uav.time_max / 3 <= uav.time < 2 * uav.time_max / 3:
+            ref_amplitude = np.array([0, 0, 0, deg2rad(90)])
+            ref_period = np.array([8, 8, 8, 10])
+            ref_bias_a = np.array([-4, -4, 0, 0])
+            ref_bias_phase = np.array([0, deg2rad(90), 0, 0])
+        else:
+            ref_amplitude = np.array([5, 5, 2, deg2rad(90)])
+            ref_period = np.array([8, 8, 8, 10])
+            ref_bias_a = np.array([5, 5, -4, 0])
+            ref_bias_phase = np.array([0, deg2rad(90), 0, 0])
         ref, dot_ref, dotdot_ref = ref_uav(uav.time, ref_amplitude, ref_period, ref_bias_a, ref_bias_phase)
         uncertainty = generate_uncertainty(time=uav.time, is_ideal=IS_IDEAL)
         
@@ -137,7 +152,7 @@ if __name__ == '__main__':
         if USE_RL:
             _s = np.concatenate((e_eta, de_eta))
             new_pos_ctrl_parma = actor.evaluate(uav.pos_state_norm(_s, update=False))
-            hehe = np.array([0, 0, 0, 0, 0, 0, 5, 5, 5]).astype(float)
+            hehe = np.array([1, 1, 1, 1, 1, 1, 5, 5, 5]).astype(float)
             ctrl_out.get_param_from_actor(new_pos_ctrl_parma * hehe)
         ctrl_out.control_update_outer(e_eta=e_eta,
                                       dot_e_eta=de_eta,
@@ -227,8 +242,8 @@ if __name__ == '__main__':
     data_record.plot_att()
     # data_record.plot_vel()
     data_record.plot_pos()
-    data_record.plot_throttle()
-    data_record.plot_torque()
-    data_record.plot_outer_obs()
+    # data_record.plot_throttle()
+    # data_record.plot_torque()
+    # data_record.plot_outer_obs()
     # data_record.plot_inner_obs()
     plt.show()

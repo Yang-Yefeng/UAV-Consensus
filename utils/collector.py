@@ -32,10 +32,8 @@ class data_collector:
             self.ref_vel[self.index] = data['ref_vel']
             self.d_in[self.index] = data['d_in']
             self.d_in_obs[self.index] = data['d_in_obs']
-            self.d_in_e_1st[self.index] = data['d_in_e_1st']
             self.d_out[self.index] = data['d_out']
             self.d_out_obs[self.index] = data['d_out_obs']
-            self.d_out_e_1st[self.index] = data['d_out_e_1st']
             self.state[self.index] = data['state']
             self.index += 1
 
@@ -87,14 +85,15 @@ class data_collector:
     def reset(self):
         self.index = 0
     
-    def plot_pos(self):
+    def plot_pos(self, use_lim: bool=False):
         plt.figure()
         plt.subplot(1, 3, 1)
         plt.plot(self.t, self.ref_pos[:, 0], 'red')
         plt.plot(self.t, self.state[:, 0], 'blue')
         plt.grid(True)
-        plt.ylim((-5, 5))
-        plt.yticks(np.arange(-5, 5, 1))
+        if use_lim:
+            plt.ylim((-5, 5))
+            plt.yticks(np.arange(-5, 5, 1))
         plt.xlabel('time(s)')
         plt.title('X')
 
@@ -102,8 +101,9 @@ class data_collector:
         plt.plot(self.t, self.ref_pos[:, 1], 'red')
         plt.plot(self.t, self.state[:, 1], 'blue')
         plt.grid(True)
-        plt.ylim((-5, 5))
-        plt.yticks(np.arange(-5, 5, 1))
+        if use_lim:
+            plt.ylim((-5, 5))
+            plt.yticks(np.arange(-5, 5, 1))
         plt.xlabel('time(s)')
         plt.title('Y')
 
@@ -111,8 +111,9 @@ class data_collector:
         plt.plot(self.t, self.ref_pos[:, 2], 'red')
         plt.plot(self.t, self.state[:, 2], 'blue')
         plt.grid(True)
-        plt.ylim((-5, 5))
-        plt.yticks(np.arange(-5, 5, 1))
+        if use_lim:
+            plt.ylim((-5, 5))
+            plt.yticks(np.arange(-5, 5, 1))
         plt.xlabel('time(s)')
         plt.title('Z')
 

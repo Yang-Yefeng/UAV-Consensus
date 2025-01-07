@@ -7,10 +7,12 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/../../")
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/../")
 
 from observer.RobustDifferentatior_3rd import robust_differentiator_3rd as rd3
+from observer.PredefinedTimeDO import predefined_time_do as pdt_do
 from controller.FNTSMC import fntsmc_param, fntsmc
 from controller.FNTSMC_Consensus import fntsmc_consensus
 from controller.RFNTSMC import rfntsmc_param, rfntsmc, rfntsmc_consensus
 from controller.FTPD import ftpd_param, ftpd
+from controller.PdT_FNTSMC import pdt_fntsmc_param, pdt_fntsmc_consensus, pdt_fntsmc
 from uav.uav import UAV, uav_param
 from utils.utils import *
 from utils.collector import data_collector
@@ -19,23 +21,30 @@ from utils.collector import data_collector
 class usv_consensus:
     def __init__(self,
                  uav_param: uav_param,  # parameters of a uav
-                 ctrl_att_param: Union[fntsmc_param, rfntsmc_param],  # parameters of attitude controller
-                 ctrl_pos_param: Union[fntsmc_param, rfntsmc_param, ftpd_param],  # parameters of position controller
+                 ctrl_att_param: Union[fntsmc_param, rfntsmc_param, pdt_fntsmc_param],  # parameters of attitude controller
+                 ctrl_pos_param: Union[fntsmc_param, rfntsmc_param, ftpd_param, pdt_fntsmc_param],  # parameters of position controller
                  adjacency: Union[np.ndarray, list],  # adjacency of this uav
                  in_degree: float,  # in-degree of this uav
                  communication: float,  # communication of this uav
-                 obs_att: rd3,  # observer of attitude loop
-                 obs_pos: rd3,  # observer of position loop
+                 obs_att: Union[rd3, pdt_do],  # observer of attitude loop
+                 obs_pos: Union[rd3, pdt_do],  # observer of position loop
                  is_ideal: bool  # exist disturbance of not
                  ):
         self.uav = UAV(uav_param)  # UAV
-        self.ctrl_att = fntsmc(ctrl_att_param)  # 内环控制器
-        if isinstance(ctrl_pos_param, ftpd_param):
-            self.ctrl_pos = ftpd(ctrl_pos_param)
-        elif isinstance(ctrl_pos_param, rfntsmc_param):
-            self.ctrl_pos = rfntsmc_consensus(ctrl_pos_param)
+        
+        if isinstance(ctrl_att_param, fntsmc_param):
+            self.ctrl_att = fntsmc(ctrl_att_param)  # 内环控制器
         else:
-            self.ctrl_pos = fntsmc_consensus(ctrl_pos_param)
+            self.ctrl_att = pdt_fntsmc(ctrl_att_param)  # 内环控制器
+        
+        if isinstance(ctrl_pos_param, ftpd_param):
+            self.ctrl_pos = ftpd(ctrl_pos_param)        # 外环控制器
+        elif isinstance(ctrl_pos_param, rfntsmc_param):
+            self.ctrl_pos = rfntsmc_consensus(ctrl_pos_param)   # 外环控制器
+        elif isinstance(ctrl_pos_param, pdt_fntsmc_param):
+            self.ctrl_pos = pdt_fntsmc_consensus(ctrl_pos_param)    # 外环控制器
+        else:
+            self.ctrl_pos = fntsmc_consensus(ctrl_pos_param)    # 外环控制器
         self.obs_att = obs_att  # 内环观测器
         self.obs_pos = obs_pos  # 外环观测器
         self.adjacency = adjacency  # 这个无人机的邻接矩阵
@@ -94,7 +103,7 @@ class usv_consensus:
                         g_nu: np.ndarray,  # 所有无人机相对于几何中心的偏移
                         nu: np.ndarray,  # 这个无人机相对于几何中心的偏移
                         eta_d: np.ndarray,  # 编队的几何中心
-                        sat:bool=False,
+                        sat: bool = False,
                         thresh: np.ndarray = 10 * np.ones(3)
                         ):
         self.consensus_e = (self.d + self.b) * self.uav.eta() - self.cal_Lambda(g_eta, g_nu, nu, eta_d)
@@ -107,12 +116,12 @@ class usv_consensus:
                             dot_nu: np.ndarray,  # 这个无人机相对于几何中心的偏移的导数
                             dot_eta_d: np.ndarray,  # 编队的几何中心的导数
                             sat: bool = False,
-                            thresh: np.ndarray = 10*np.ones(3)
+                            thresh: np.ndarray = 10 * np.ones(3)
                             ):
         self.consensus_dot_e = (self.d + self.b) * self.uav.dot_eta() - self.cal_dot_Lambda(g_dot_eta, g_dot_nu, dot_nu, dot_eta_d)
         if sat:
             self.consensus_dot_e = np.clip(self.consensus_dot_e, -thresh, thresh)
-        
+    
     def calculate_cost(self, eta_d: np.ndarray, nu: np.ndarray, dot_eta_d: np.ndarray, dot_nu: np.ndarray):
         cost_pos = np.dot((self.uav.eta() - eta_d - nu) ** 2, self.Q_pos)
         # cost_vel = np.dot((self.uav.dot_eta() - dot_eta_d - dot_nu) ** 2, self.Q_vel)
@@ -121,8 +130,8 @@ class usv_consensus:
     
     def reset(self, _uav_param, _ctrl_att_param, _ctrl_pos_param):
         self.uav.reset_with_param()
-        self.ctrl_att.fntsmc_reset_with_new_param(_ctrl_att_param)
-        self.ctrl_pos.fntsmc_reset_with_new_param(_ctrl_pos_param)
+        self.ctrl_att.reset_with_new_param(_ctrl_att_param)
+        self.ctrl_pos.reset_with_new_param(_ctrl_pos_param)
         self.obs_att.reset()
         self.obs_pos.reset()
         

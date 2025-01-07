@@ -67,49 +67,7 @@ def offset_uav_n(time: float, amplitude: np.ndarray, period: np.ndarray, bias_a:
     return _off, _doff, _ddoff
 
 
-# def generate_uncertainty(time: float, is_ideal: bool = False) -> np.ndarray:
-# 	"""
-#     :param time:        time
-#     :param is_ideal:    ideal or not
-#     :return:            Fdx, Fdy, Fdz, dp, dq, dr
-#     """
-# 	if is_ideal:
-# 		return np.array([0, 0, 0, 0, 0, 0]).astype(float)
-# 	else:
-# 		T = 2
-# 		w = 2 * np.pi / T
-# 		phi0 = 0.
-# 		if time <= 5:
-# 			phi0 = 0.
-# 			Fdx = 0.5 * np.sin(w * time + phi0) + 0.2 * np.cos(3 * w * time + phi0) + 0.2
-# 			Fdy = 0.5 * np.cos(w * time + phi0) + 0.2 * np.sin(3 * w * time + phi0) + 0.4
-# 			Fdz = 0.5 * np.sin(w * time + phi0) + 0.2 * np.cos(3 * w * time + phi0) - 0.5
-#
-# 			dp = 0.5 * np.sin(w * time + phi0) + 0.2 * np.cos(w * time + phi0)
-# 			dq = 0.5 * np.cos(w * time + phi0) + 0.2 * np.sin(w * time + phi0)
-# 			dr = 0.5 * np.cos(w * time + phi0) + 0.2 * np.sin(w * time + phi0)
-# 		elif 5 < time <= 10:
-# 			Fdx = 1.5
-# 			Fdy = 0.4 * (time - 5.0)
-# 			Fdz = -0.6
-#
-# 			dp = 0.5 * np.sin(w * time + phi0) + 0.2 * np.cos(2 * np.sin(2 * w) * time + phi0)
-# 			dq = 0.5 * np.cos(1.5 * np.sin(2 * w) * time + phi0) + 0.2 * np.sin(w * time + phi0)
-# 			dr = 0.5 * np.sign(np.round(time - 5) % 2 - 0.5)
-# 		else:
-# 			phi0 = np.pi / 2
-# 			Fdx = 0.5 * np.sin(np.cos(2 * w) * time + phi0) - 1.0 * np.cos(3 * np.sin(w) * time + phi0)
-# 			Fdy = 0.5 * np.sign(np.round(time - 10) % 3 - 1.5) + 0.5 * np.sin(2 * w * time + phi0) - 0.4
-# 			Fdz = 0.5 * np.cos(w * time + phi0) - 1.0 * np.sin(3 * w + time + phi0) + 1.0
-#
-# 			dp = 0.5 * np.sin(np.sin(2 * w) * time + phi0) + 0.2 * np.cos(w * time + phi0)
-# 			dq = 1.5 * np.cos(w * time + phi0) + 0.2 * np.sin(w * time + phi0) - 0.7
-# 			dr = 0.5 * np.cos(2 * w * time + phi0) + 0.6 * np.sin(w * time + phi0)
-#
-# 		return np.array([Fdx, Fdy, Fdz, dp, dq, dr])
-
-
-def generate_uncertainty(time: float, is_ideal: bool = False) -> np.ndarray:
+def generate_uncertainty(time: float, is_ideal: bool = False, att: bool = False) -> np.ndarray:
     """
     :param time:        time
     :param is_ideal:    ideal or not
@@ -118,18 +76,73 @@ def generate_uncertainty(time: float, is_ideal: bool = False) -> np.ndarray:
     if is_ideal:
         return np.array([0, 0, 0, 0, 0, 0]).astype(float)
     else:
+        # T = 5
+        # w = 2 * np.pi / T
+        # phi0 = 0.
+        # if time <= 5:
+        #     phi0 = 0.
+        #     Fdx = 0.5 * np.sin(w * time + phi0) + 0.2 * np.cos(3 * w * time + phi0) + 0.2
+        #     Fdy = 0.5 * np.cos(w * time + phi0) + 0.2 * np.sin(3 * w * time + phi0) + 0.4
+        #     Fdz = 0.5 * np.sin(w * time + phi0) + 0.2 * np.cos(3 * w * time + phi0) - 0.5
+        #     dp = 0.5 * np.sin(w * time + phi0) + 0.2 * np.cos(w * time + phi0)
+        #     dq = 0.5 * np.cos(w * time + phi0) + 0.2 * np.sin(w * time + phi0)
+        #     dr = 0.5 * np.cos(w * time + phi0) + 0.2 * np.sin(w * time + phi0)
+        # elif 5 < time <= 10:
+        #     Fdx = 1.5
+        #     Fdy = 0.4 * (time - 5.0)
+        #     Fdz = -0.6
+        #     dp = 0.5 * np.sin(w * time + phi0) + 0.2 * np.cos(w * time + phi0)
+        #     dq = 0.5 * np.cos(w * time + phi0) + 0.2 * np.sin(w * time + phi0)
+        #     dr = 0.5
+        # else:
+        #     phi0 = np.pi / 2
+        #     Fdx = 0.5 * np.sin(w * time + phi0) - 1.0 * np.cos(3 * w + time + phi0)
+        #     Fdy = 0.5 * np.cos(w * time + phi0) - 1.0 * np.sin(3 * w + time + phi0) + 1.0
+        #     Fdz = 0.5 * np.sin(w * time + phi0) - 1.0 * np.cos(3 * w + time + phi0) - 0.4
+        #     dp = 0.5 * np.sin(w * time + phi0) + 0.2 * np.cos(w * time + phi0)
+        #     dq = 0.5 * np.cos(w * time + phi0) + 0.2 * np.sin(w * time + phi0)
+        #     dr = 0.5 * np.cos(w * time + phi0) + 0.2 * np.sin(w * time + phi0)
+
         T = 5
         w = 2 * np.pi / T
         phi0 = 0.
-        Fdx = 1.5 * np.sin(w * time + phi0) + 0.2 * np.cos(3 * w * time + phi0)
-        Fdy = 1.5 * np.cos(w * time + phi0) + 0.2 * np.sin(3 * w * time + phi0)
-        Fdz = 1.5 * np.sin(w * time + phi0) + 0.2 * np.cos(3 * w * time + phi0)
+        if time < 10:
+            Fdx = 0.5 * np.sin(w * time + phi0) + 1.5 * np.cos(0.5 * w * time + phi0)
+            Fdy = 1 * np.sin(w * time + phi0) + 0.5 * np.cos(0.5 * w * time + phi0)
+            Fdz = 1.5 * np.sin(w * time + phi0) - 2 * np.cos(0.5 * w * time + phi0)
+            dp = 2 * np.sin(w * time + phi0) + 2.5 * np.cos(0.5 * w * time + phi0)
+            dq = 1 * np.sin(w * time + phi0) + 2.5 * np.cos(0.5 * w * time + phi0)
+            dr = 1.5 * np.sin(w * time + phi0) - 2 * np.cos(0.5 * w * time + phi0)
+        elif 10 <= time < 20:
+            Fdx = 1 * np.sin(np.sin(w * (time - 10) + phi0))
+            Fdy = 2 * np.sin(np.cos(w * (time - 10) + phi0))
+            Fdz = 1.5 * np.cos(np.sin(w * (time - 10) + phi0))
+            dp = 1.5 * np.sin(np.sin(w * (time - 10) + phi0))
+            dq = 1.7 * np.sin(np.cos(w * (time - 10) + phi0))
+            dr = 2.5 * np.cos(np.sin(w * (time - 10) + phi0))
+        elif 20 <= time < 30:
+            Fdx = 3.2
+            Fdy = 2.0
+            Fdz = 0.0
+            dp = 0.0
+            dq = 1.5
+            dr = -1.0
+        elif 30 <= time < 40:
+            Fdx = np.sqrt(time - 30) + 1.5 * np.cos(np.sin(np.pi * (time - 30)))
+            Fdy = 0.5 * np.sqrt(time - 30) + 0.5 * np.cos(np.sin(np.pi * (time - 30)))
+            Fdz = 1.5 * np.sqrt(time - 30) - 1.0 * np.cos(np.sin(np.pi * (time - 30)))
+            dp = np.sqrt(time - 30) + 1.5 * np.cos(np.sin(np.pi * (time - 30)))
+            dq = 0.5 * np.sqrt(time - 30) + 0.5 * np.cos(1.5 * np.sin(np.pi * (time - 30)))
+            dr = 1.5 * np.sqrt(time - 30) - 1.0 * np.cos(0.5 * np.sin(np.pi * (time - 30)))
+        else:
+            Fdx = 0.
+            Fdy = -1.
+            Fdz = 2.
+            dp = 0.5
+            dq = 0.0
+            dr = 1.0
 
-        dp = 0.
-        dq = 0.
-        dr = 0.5 * np.cos(w * time + phi0) + 0.2 * np.sin(w * time + phi0)
-
-        return np.array([Fdx, Fdy, Fdz, dp, dq, dr])
+        return np.array([0., 0., 0., dp, dq, dr]) if att else np.array([Fdx, Fdy, Fdz, 0., 0., 0.])
 
 
 def ref_uav_sequence(dt: float,
@@ -176,6 +189,7 @@ def ref_uav_sequence_Bernoulli(dt: float,
 
     return _r, _dr, _ddr
 
+
 def offset_uav_n_sequence(dt: float, tm: float, A: np.ndarray, T: np.ndarray, ba: np.ndarray, bp: np.ndarray):
     N = int(np.round(tm / dt))
     uav_num = A.shape[0]
@@ -188,3 +202,85 @@ def offset_uav_n_sequence(dt: float, tm: float, A: np.ndarray, T: np.ndarray, ba
         _doff[i, :, :] = A * w * np.cos(w * i * dt + bp)
         _ddoff[i, :, :] = -A * w ** 2 * np.sin(w * i * dt + bp)
     return _off, _doff, _ddoff
+
+
+def ref_uav_consensus_sequence(dt: float, tm: float, flag: int):
+    if flag == 0:
+        ref_amplitude = np.array([5, 5, 1, np.pi / 2])  # x y z psi
+        ref_period = np.array([10, 10, 5, 10])
+        ref_bias_a = np.array([2, 3, 2.0, 0])
+        ref_bias_phase = np.array([0, np.pi / 2, 0, 0])
+        
+        rv = 2.0
+        t0 = np.pi / 3
+        offset_amplitude = np.array([[0., 0., 0.], [0., 0., 0.], [0., 0., 0.], [0., 0., 0.], [0., 0., 0.], [0., 0., 0.]])
+        offset_period = np.array([[5, 5, 4], [5, 5, 4], [5, 5, 4], [5, 5, 4], [5, 5, 4], [5, 5, 4]])
+        offset_bias_a = np.array([[rv, 0, 0], [rv * np.sin(t0), rv * np.cos(t0), 0], [-rv * np.sin(t0), rv * np.cos(t0), 0],
+                                  [-rv, 0, 0], [-rv * np.sin(t0), -rv * np.cos(t0), 0], [rv * np.sin(t0), -rv * np.cos(t0), 0]])
+        offset_bias_phase = np.array([[0., 0., 0.], [0., 0., 0.], [0., 0., 0.], [0., 0., 0.], [0., 0., 0.], [0., 0., 0.]])
+        pos0 = np.array([[rv, 0, 0], [rv * np.sin(t0), rv * np.cos(t0), 0], [-rv * np.sin(t0), rv * np.cos(t0), 0],
+                         [-rv, 0, 0], [-rv * np.sin(t0), -rv * np.cos(t0), 0], [rv * np.sin(t0), -rv * np.cos(t0), 0]])
+    elif flag == 1:
+        ref_amplitude = np.array([0, 0, 0, 0])  # x y z psi
+        ref_period = np.array([5, 5, 4, 5])
+        ref_bias_a = np.array([2, 2, 1.0, 0])
+        ref_bias_phase = np.array([np.pi / 2, 0, 0, 0])
+        
+        offset_amplitude = np.array([[0., 0., 0.], [0., 0., 0.], [0., 0., 0.], [0., 0., 0.]])
+        offset_period = np.array([[5, 5, 4], [5, 5, 4], [5, 5, 4], [5, 5, 4]])
+        offset_bias_a = np.array([[0.5, 0, 0], [0, 0.5, 0], [-0.5, 0., 0.], [0., -0.5, 0.]])
+        offset_bias_phase = np.array([[0., 0., 0.], [0., 0., 0.], [0., 0., 0.], [0., 0., 0.]])
+        pos0 = np.array([[2, 0, 0], [0, 2, 0], [-2, 0, 0], [0, -2, 0], [0, -2, 0], [0, -2, 0]])
+    elif flag == 2:
+        ref_amplitude = np.array([5, 5, 0, np.pi / 2])  # x y z psi
+        ref_period = np.array([5, 5, 5, 10])
+        ref_bias_a = np.array([0., 0., 6.0, 0])
+        ref_bias_phase = np.array([0, np.pi / 2, 0, 0])
+        
+        rv = 2.0
+        t0 = np.pi / 3
+        offset_amplitude = np.array([[2, 2, 0.], [2, 2, 0.], [2, 2, 0.], [2, 2, 0.], [2, 2, 0.], [2, 2, 0.]])
+        offset_period = np.array([[10, 10, 10], [10, 10, 10], [10, 10, 10], [10, 10, 10], [10, 10, 10], [10, 10, 10]])
+        offset_bias_a = np.array([[0., 0., 2.], [0., 0., -2.], [0., 0., 2.], [0., 0., -2.], [0., 0., 2.], [0., 0., -2.]])
+        offset_bias_phase = np.array([[np.pi / 2 + (1 - 1) * t0, (1 - 1) * t0, 0.],
+                                      [np.pi / 2 + (2 - 1) * t0, (2 - 1) * t0, 0.],
+                                      [np.pi / 2 + (3 - 1) * t0, (3 - 1) * t0, 0.],
+                                      [np.pi / 2 + (4 - 1) * t0, (4 - 1) * t0, 0.],
+                                      [np.pi / 2 + (5 - 1) * t0, (5 - 1) * t0, 0.],
+                                      [np.pi / 2 + (6 - 1) * t0, (6 - 1) * t0, 0.]])
+        pos0 = np.array([[rv, 0, 0], [rv * np.sin(t0), rv * np.cos(t0), 0], [-rv * np.sin(t0), rv * np.cos(t0), 0],
+                         [-rv, 0, 0], [-rv * np.sin(t0), -rv * np.cos(t0), 0], [rv * np.sin(t0), -rv * np.cos(t0), 0]])
+    elif flag == 3:
+        ref_amplitude = np.array([5, 5, 1, np.pi / 2])  # x y z psi
+        ref_period = np.array([10, 10, 5, 10])
+        ref_bias_a = np.array([2, 3, 6.0, 0])
+        ref_bias_phase = np.array([0, 0, 0, 0])
+        
+        rv = 2.0
+        t0 = np.pi / 3
+        offset_amplitude = np.array([[0., 0., 0.], [0., 0., 0.], [0., 0., 0.], [0., 0., 0.], [0., 0., 0.], [0., 0., 0.]])
+        offset_period = np.array([[5, 5, 4], [5, 5, 4], [5, 5, 4], [5, 5, 4], [5, 5, 4], [5, 5, 4]])
+        offset_bias_a = np.array([[rv, 0, 2.], [rv * np.sin(t0), rv * np.cos(t0), -2.], [-rv * np.sin(t0), rv * np.cos(t0), 2.],
+                                  [-rv, 0, -2.], [-rv * np.sin(t0), -rv * np.cos(t0), 2.], [rv * np.sin(t0), -rv * np.cos(t0), -2.]])
+        offset_bias_phase = np.array([[0., 0., 0.], [0., 0., 0.], [0., 0., 0.], [0., 0., 0.], [0., 0., 0.], [0., 0., 0.]])
+        pos0 = np.array([[rv, 0, 0], [rv * np.sin(t0), rv * np.cos(t0), 0], [-rv * np.sin(t0), rv * np.cos(t0), 0],
+                         [-rv, 0, 0], [-rv * np.sin(t0), -rv * np.cos(t0), 0], [rv * np.sin(t0), -rv * np.cos(t0), 0]])
+    else:
+        ref_amplitude = np.zeros(4)
+        ref_period = np.zeros(4)
+        ref_bias_a = np.zeros(4)
+        ref_bias_phase = np.zeros(4)
+        
+        offset_amplitude = np.zeros((4, 4))
+        offset_period = np.zeros((4, 4))
+        offset_bias_a = np.zeros((4, 4))
+        offset_bias_phase = np.zeros((4, 4))
+        pos0 = np.array([[], [], [], [], [], []])
+    
+    if flag == 3:
+        r, dr, ddr = ref_uav_sequence_Bernoulli(dt, tm, ref_amplitude, ref_period, ref_bias_a, ref_bias_phase)
+    else:
+        r, dr, ddr = ref_uav_sequence(dt, tm, ref_amplitude, ref_period, ref_bias_a, ref_bias_phase)
+    nu, dnu, ddnu = offset_uav_n_sequence(dt, tm, offset_amplitude, offset_period, offset_bias_a, offset_bias_phase)
+    
+    return r, dr, ddr, nu, dnu, ddnu, pos0

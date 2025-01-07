@@ -45,7 +45,7 @@
         <time_max>40</time_max>
     </uav_param>
 
-    <att_ctrl_param>
+    <att_fntsmc_ctrl_param>
 <!--        <k1>[4., 4., 15.]</k1>-->
 <!--        <k2>[1., 1., 1.5]</k2>-->
 <!--        <k3>[0.05, 0.05, 0.05]</k3>-->
@@ -60,9 +60,49 @@
         <alpha2>[1.01, 1.01, 1.01]</alpha2>
         <dim>3</dim>
         <dt>0.01</dt>
-    </att_ctrl_param>
+    </att_fntsmc_ctrl_param>
 
-    <pos_ctrl_param>
+    <att_pdt_fntsmc_ctrl_param>
+        <alpha_s>[0.833333, 0.833333, 0.833333]</alpha_s>
+        <beta1_s>[1., 1., 1.]</beta1_s>
+        <beta2_s>[1., 1., 1.]</beta2_s>
+        <beta3_s>[1., 1., 1.]</beta3_s>
+        <Ts>[1., 1., 1.]</Ts>
+        <kappa1_s>[1.05, 1.05, 1.05]</kappa1_s>
+
+        <alpha_c>[0.833333, 0.833333, 0.833333]</alpha_c>  <!-- 11 / 13 -->
+        <beta1_c>[1., 1., 1.]</beta1_c>
+        <beta2_c>[1., 1., 1.]</beta2_c>
+        <beta3_c>[1., 1., 1.]</beta3_c>
+        <Tc>[3., 3., 3.]</Tc>
+        <kappa1_c>[0.8571, 0.8571, 0.8571]</kappa1_c>
+
+        <k2>[5., 5., 5.]</k2>
+        <dim>3</dim>
+        <dt>0.01</dt>
+    </att_pdt_fntsmc_ctrl_param>
+
+    <pos_pdt_fntsmc_ctrl_param>
+        <alpha_s>[0.846153846, 0.846153846, 0.846153846]</alpha_s>
+        <beta1_s>[5., 5., 5.]</beta1_s>
+        <beta2_s>[1., 1., 1.]</beta2_s>
+        <beta3_s>[1., 1., 1.]</beta3_s>
+        <Ts>[5., 5., 5.]</Ts>
+        <kappa1_s>[1.1, 1.1, 1.1]</kappa1_s>
+
+        <alpha_c>[0.846153846, 0.846153846, 0.846153846]</alpha_c>
+        <beta1_c>[7., 7., 7.]</beta1_c>
+        <beta2_c>[1., 1., 1.]</beta2_c>
+        <beta3_c>[1., 1., 1.]</beta3_c>
+        <Tc>[10., 10., 10.]</Tc>
+        <kappa1_c>[0.81, 0.81, 0.81]</kappa1_c>
+
+        <k2>[4., 4., 4.]</k2>
+        <dim>3</dim>
+        <dt>0.01</dt>
+    </pos_pdt_fntsmc_ctrl_param>
+
+    <pos_fntsmc_ctrl_param>
         <!-- 最好的 -->
         <k1>[0.3, 0.3, 1.0]</k1>
         <k2>[0.5, 0.5, 1]</k2>
@@ -81,7 +121,7 @@
         <alpha2>[1.01, 1.01, 1.01]</alpha2>
         <dim>3</dim>
         <dt>0.01</dt>
-    </pos_ctrl_param>
+    </pos_fntsmc_ctrl_param>
 
     <pos_rfntsmc_ctrl_param>
         <k1>[1.2, 0.8, 1.5]</k1>

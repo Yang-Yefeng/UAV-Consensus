@@ -93,7 +93,7 @@ class fntsmc:
 			if action_from_actor[i + 6] > 0:
 				self.k4[i] = action_from_actor[i + 6]
 	
-	def fntsmc_reset_with_new_param(self, param: fntsmc_param):
+	def reset_with_new_param(self, param: fntsmc_param):
 		self.k1 = param.k1
 		self.k2 = param.k2
 		self.k3 = param.k3
