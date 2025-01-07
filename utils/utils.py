@@ -114,7 +114,7 @@ def get_uav_param_from_XML(root: ET.Element) -> dict:
 
 def get_att_ctrl_param_from_XML(root: ET.Element) -> fntsmc_param:
 	_param = fntsmc_param()
-	tag_value = XML_GetTagValue(XML_FindNode('att_ctrl_param', root))
+	tag_value = XML_GetTagValue(XML_FindNode('att_fntsmc_ctrl_param', root))
 	_param.k1 = split_str_2_1d_numpy(tag_value['k1'])
 	_param.k2 = split_str_2_1d_numpy(tag_value['k2'])
 	_param.k3 = split_str_2_1d_numpy(tag_value['k3'])
@@ -151,7 +151,7 @@ def get_att_pdt_fntsmc_param_from_XML(root: ET.Element) -> pdt_fntsmc_param:
 
 def get_pos_ctrl_param_from_XML(root: ET.Element) -> fntsmc_param:
 	_param = fntsmc_param()
-	tag_value = XML_GetTagValue(XML_FindNode('pos_ctrl_param', root))
+	tag_value = XML_GetTagValue(XML_FindNode('pos_fntsmc_ctrl_param', root))
 	_param.k1 = split_str_2_1d_numpy(tag_value['k1'])
 	_param.k2 = split_str_2_1d_numpy(tag_value['k2'])
 	_param.k3 = split_str_2_1d_numpy(tag_value['k3'])

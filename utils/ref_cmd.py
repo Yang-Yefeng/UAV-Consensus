@@ -205,51 +205,46 @@ def offset_uav_n_sequence(dt: float, tm: float, A: np.ndarray, T: np.ndarray, ba
 
 
 def ref_uav_consensus_sequence(dt: float, tm: float, flag: int):
-    if flag == 0:
-        ref_amplitude = np.array([5, 5, 1, np.pi / 2])  # x y z psi
-        ref_period = np.array([10, 10, 5, 10])
-        ref_bias_a = np.array([2, 3, 2.0, 0])
+    if flag == 0:   # 大圈逆时针，小圈不动
+        ref_amplitude = np.array([5, 5, 2, 0])  # x y z psi
+        ref_period = np.array([10, 10, 10, 10])
+        ref_bias_a = np.array([0., 0., 5.0, 0])
         ref_bias_phase = np.array([0, np.pi / 2, 0, 0])
         
         rv = 2.0
-        t0 = np.pi / 3
-        offset_amplitude = np.array([[0., 0., 0.], [0., 0., 0.], [0., 0., 0.], [0., 0., 0.], [0., 0., 0.], [0., 0., 0.]])
-        offset_period = np.array([[5, 5, 4], [5, 5, 4], [5, 5, 4], [5, 5, 4], [5, 5, 4], [5, 5, 4]])
-        offset_bias_a = np.array([[rv, 0, 0], [rv * np.sin(t0), rv * np.cos(t0), 0], [-rv * np.sin(t0), rv * np.cos(t0), 0],
-                                  [-rv, 0, 0], [-rv * np.sin(t0), -rv * np.cos(t0), 0], [rv * np.sin(t0), -rv * np.cos(t0), 0]])
-        offset_bias_phase = np.array([[0., 0., 0.], [0., 0., 0.], [0., 0., 0.], [0., 0., 0.], [0., 0., 0.], [0., 0., 0.]])
-        pos0 = np.array([[rv, 0, 0], [rv * np.sin(t0), rv * np.cos(t0), 0], [-rv * np.sin(t0), rv * np.cos(t0), 0],
-                         [-rv, 0, 0], [-rv * np.sin(t0), -rv * np.cos(t0), 0], [rv * np.sin(t0), -rv * np.cos(t0), 0]])
-    elif flag == 1:
-        ref_amplitude = np.array([0, 0, 0, 0])  # x y z psi
-        ref_period = np.array([5, 5, 4, 5])
-        ref_bias_a = np.array([2, 2, 1.0, 0])
-        ref_bias_phase = np.array([np.pi / 2, 0, 0, 0])
-        
         offset_amplitude = np.array([[0., 0., 0.], [0., 0., 0.], [0., 0., 0.], [0., 0., 0.]])
         offset_period = np.array([[5, 5, 4], [5, 5, 4], [5, 5, 4], [5, 5, 4]])
-        offset_bias_a = np.array([[0.5, 0, 0], [0, 0.5, 0], [-0.5, 0., 0.], [0., -0.5, 0.]])
+        offset_bias_a = np.array([[rv, 0, 0], [0, rv, 0], [-rv, 0, 0], [0, -rv, 0]])
         offset_bias_phase = np.array([[0., 0., 0.], [0., 0., 0.], [0., 0., 0.], [0., 0., 0.]])
-        pos0 = np.array([[2, 0, 0], [0, 2, 0], [-2, 0, 0], [0, -2, 0], [0, -2, 0], [0, -2, 0]])
-    elif flag == 2:
-        ref_amplitude = np.array([5, 5, 0, np.pi / 2])  # x y z psi
-        ref_period = np.array([5, 5, 5, 10])
+        pos0 = 2.5 * offset_bias_a
+    elif flag == 1:     # 整体平移，小圈不动
+        ref_amplitude = np.array([0, 0, 0, 0])  # x y z psi
+        ref_period = np.array([5, 5, 4, 5])
+        ref_bias_a = np.array([10, 10, 5, 0])
+        ref_bias_phase = np.array([np.pi / 2, 0, 0, 0])
+        
+        rv = 2.0
+        offset_amplitude = np.array([[0., 0., 0.], [0., 0., 0.], [0., 0., 0.], [0., 0., 0.]])
+        offset_period = np.array([[5, 5, 4], [5, 5, 4], [5, 5, 4], [5, 5, 4]])
+        offset_bias_a = np.array([[rv, 0, 0], [0, rv, 0], [-rv, 0, 0], [0, -rv, 0]])
+        offset_bias_phase = np.array([[0., 0., 0.], [0., 0., 0.], [0., 0., 0.], [0., 0., 0.]])
+        pos0 = 2.5 * offset_bias_a
+    elif flag == 2:     # 第三组 大圈逆时针，小圈逆时针
+        ref_amplitude = np.array([5, 5, 2, 0])  # x y z psi
+        ref_period = np.array([10, 10, 10, 10])
         ref_bias_a = np.array([0., 0., 6.0, 0])
         ref_bias_phase = np.array([0, np.pi / 2, 0, 0])
         
         rv = 2.0
-        t0 = np.pi / 3
-        offset_amplitude = np.array([[2, 2, 0.], [2, 2, 0.], [2, 2, 0.], [2, 2, 0.], [2, 2, 0.], [2, 2, 0.]])
-        offset_period = np.array([[10, 10, 10], [10, 10, 10], [10, 10, 10], [10, 10, 10], [10, 10, 10], [10, 10, 10]])
-        offset_bias_a = np.array([[0., 0., 2.], [0., 0., -2.], [0., 0., 2.], [0., 0., -2.], [0., 0., 2.], [0., 0., -2.]])
-        offset_bias_phase = np.array([[np.pi / 2 + (1 - 1) * t0, (1 - 1) * t0, 0.],
-                                      [np.pi / 2 + (2 - 1) * t0, (2 - 1) * t0, 0.],
-                                      [np.pi / 2 + (3 - 1) * t0, (3 - 1) * t0, 0.],
-                                      [np.pi / 2 + (4 - 1) * t0, (4 - 1) * t0, 0.],
-                                      [np.pi / 2 + (5 - 1) * t0, (5 - 1) * t0, 0.],
-                                      [np.pi / 2 + (6 - 1) * t0, (6 - 1) * t0, 0.]])
-        pos0 = np.array([[rv, 0, 0], [rv * np.sin(t0), rv * np.cos(t0), 0], [-rv * np.sin(t0), rv * np.cos(t0), 0],
-                         [-rv, 0, 0], [-rv * np.sin(t0), -rv * np.cos(t0), 0], [rv * np.sin(t0), -rv * np.cos(t0), 0]])
+        t0 = np.pi / 2
+        offset_amplitude = np.array([[2, 2, 0.], [2, 2, 0.], [2, 2, 0.], [2, 2, 0.]])
+        offset_period = np.array([[5, 5, 5], [5, 5, 5], [5, 5, 5], [5, 5, 5]])
+        offset_bias_a = np.array([[rv, 0, 0], [0, rv, 0], [-rv, 0, 0], [0, -rv, 0]])
+        offset_bias_phase = np.array([[t0, (1 - 1) * t0, 0.],
+                                      [t0 + (2 - 1) * t0, (2 - 1) * t0, 0.],
+                                      [t0 + (3 - 1) * t0, (3 - 1) * t0, 0.],
+                                      [t0 + (4 - 1) * t0, (4 - 1) * t0, 0.]])
+        pos0 = 2.5 * offset_bias_a
     elif flag == 3:
         ref_amplitude = np.array([5, 5, 1, np.pi / 2])  # x y z psi
         ref_period = np.array([10, 10, 5, 10])
@@ -257,14 +252,11 @@ def ref_uav_consensus_sequence(dt: float, tm: float, flag: int):
         ref_bias_phase = np.array([0, 0, 0, 0])
         
         rv = 2.0
-        t0 = np.pi / 3
-        offset_amplitude = np.array([[0., 0., 0.], [0., 0., 0.], [0., 0., 0.], [0., 0., 0.], [0., 0., 0.], [0., 0., 0.]])
-        offset_period = np.array([[5, 5, 4], [5, 5, 4], [5, 5, 4], [5, 5, 4], [5, 5, 4], [5, 5, 4]])
-        offset_bias_a = np.array([[rv, 0, 2.], [rv * np.sin(t0), rv * np.cos(t0), -2.], [-rv * np.sin(t0), rv * np.cos(t0), 2.],
-                                  [-rv, 0, -2.], [-rv * np.sin(t0), -rv * np.cos(t0), 2.], [rv * np.sin(t0), -rv * np.cos(t0), -2.]])
-        offset_bias_phase = np.array([[0., 0., 0.], [0., 0., 0.], [0., 0., 0.], [0., 0., 0.], [0., 0., 0.], [0., 0., 0.]])
-        pos0 = np.array([[rv, 0, 0], [rv * np.sin(t0), rv * np.cos(t0), 0], [-rv * np.sin(t0), rv * np.cos(t0), 0],
-                         [-rv, 0, 0], [-rv * np.sin(t0), -rv * np.cos(t0), 0], [rv * np.sin(t0), -rv * np.cos(t0), 0]])
+        offset_amplitude = np.array([[0., 0., 0.], [0., 0., 0.], [0., 0., 0.], [0., 0., 0.]])
+        offset_period = np.array([[5, 5, 4], [5, 5, 4], [5, 5, 4], [5, 5, 4]])
+        offset_bias_a = np.array([[rv, 0, 0], [0, rv, 0], [-rv, 0, 0], [0, -rv, 0]])
+        offset_bias_phase = np.array([[0., 0., 0.], [0., 0., 0.], [0., 0., 0.], [0., 0., 0.]])
+        pos0 = 2.5 * offset_bias_a
     else:
         ref_amplitude = np.zeros(4)
         ref_period = np.zeros(4)
@@ -275,7 +267,7 @@ def ref_uav_consensus_sequence(dt: float, tm: float, flag: int):
         offset_period = np.zeros((4, 4))
         offset_bias_a = np.zeros((4, 4))
         offset_bias_phase = np.zeros((4, 4))
-        pos0 = np.array([[], [], [], [], [], []])
+        pos0 = np.array([[0., 0., 0.], [0., 0., 0.], [0., 0., 0.], [0., 0., 0.]])
     
     if flag == 3:
         r, dr, ddr = ref_uav_sequence_Bernoulli(dt, tm, ref_amplitude, ref_period, ref_bias_a, ref_bias_phase)

@@ -32,12 +32,11 @@ uav_par['g_tm'] = g_v['g_tm']  # 仅仅是为了防止采样周期不一样，�
 uav_par = uav_param(from_dict=uav_par)
 
 att_ctrl_param = get_att_pdt_fntsmc_param_from_XML(config_root)
-# att_ctrl_param = get_att_fntsmc_ctrl_param_from_XML(config_root)
 att_ctrl_param.dt = g_v['dt']
 pos_ctrl_param = get_pos_pdt_fntsmc_param_from_XML(config_root)
 pos_ctrl_param.dt = g_v['dt']
 
-TEST_GROUP = 0
+TEST_GROUP = 3
 # 0: 大圈逆时针，小圈不动
 # 1: 整体平移，小圈不动
 # 2: 第三组 大圈逆时针，小圈逆时针
