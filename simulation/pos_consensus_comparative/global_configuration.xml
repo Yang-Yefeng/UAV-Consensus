@@ -6,7 +6,7 @@
         <g_t>0.</g_t>                   <!--global time-->
         <g_N>0</g_N>                    <!--global index-->
         <g_tm>30</g_tm>                 <!--global maximum simulation time-->
-        <g_ideal>0</g_ideal>            <!--global ideal-->
+        <g_ideal>1</g_ideal>            <!--global ideal-->
         <uav_num>4</uav_num>            <!--number of UAV-->
 
 <!--        <g_A>[[0, 0, 0, 0], [1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0]]</g_A>     &lt;!&ndash; adjacent matrix &ndash;&gt;-->
@@ -92,6 +92,26 @@
         <dim>3</dim>
         <dt>0.01</dt>
     </pos_pdt_fntsmc_ctrl_param>
+
+<!--    <pos_pdt_fntsmc_ctrl_param>-->
+<!--        <alpha_s>[0.6, 0.6, 0.6]</alpha_s>-->
+<!--        <beta1_s>[1., 1., 1.]</beta1_s>-->
+<!--        <beta2_s>[1., 1., 1.]</beta2_s>-->
+<!--        <beta3_s>[1., 1., 1.]</beta3_s>-->
+<!--        <Ts>[10., 10., 10.]</Ts>-->
+<!--        <kappa1_s>[1.1, 1.1, 1.1]</kappa1_s>-->
+
+<!--        <alpha_c>[0.6, 0.6, 0.6]</alpha_c>-->
+<!--        <beta1_c>[1., 1., 1.]</beta1_c>-->
+<!--        <beta2_c>[1., 1., 1.]</beta2_c>-->
+<!--        <beta3_c>[1., 1., 1.]</beta3_c>-->
+<!--        <Tc>[10., 10., 10.]</Tc>-->
+<!--        <kappa1_c>[1, 1, 1]</kappa1_c>-->
+
+<!--        <k2>[4., 4., 4.]</k2>-->
+<!--        <dim>3</dim>-->
+<!--        <dt>0.01</dt>-->
+<!--    </pos_pdt_fntsmc_ctrl_param>-->
 
     <pos_fntsmc_ctrl_param>
         <!-- 最好的 -->

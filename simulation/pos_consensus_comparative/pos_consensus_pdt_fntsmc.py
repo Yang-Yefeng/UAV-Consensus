@@ -36,7 +36,7 @@ att_ctrl_param.dt = g_v['dt']
 pos_ctrl_param = get_pos_pdt_fntsmc_param_from_XML(config_root)
 pos_ctrl_param.dt = g_v['dt']
 
-TEST_GROUP = 3
+TEST_GROUP = 0
 # 0: 大圈逆时针，小圈不动
 # 1: 整体平移，小圈不动
 # 2: 第三组 大圈逆时针，小圈逆时针
@@ -46,7 +46,7 @@ TEST_GROUP = 3
 '''uav group initialization'''
 USE_RL = False
 USE_OBS_IN = False
-USE_OBS_OUT = True
+USE_OBS_OUT = False
 SAVE = True
 
 '''generate uncertainty and global reference for all UAVs at all timesteps'''

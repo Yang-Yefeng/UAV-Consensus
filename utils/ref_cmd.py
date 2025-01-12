@@ -245,8 +245,8 @@ def ref_uav_consensus_sequence(dt: float, tm: float, flag: int):
                                       [t0 + (3 - 1) * t0, (3 - 1) * t0, 0.],
                                       [t0 + (4 - 1) * t0, (4 - 1) * t0, 0.]])
         pos0 = 2.5 * offset_bias_a
-    elif flag == 3:
-        ref_amplitude = np.array([5, 5, 1, np.pi / 2])  # x y z psi
+    elif flag == 3:     # 八字
+        ref_amplitude = np.array([5, 5, 1, 0])  # x y z psi
         ref_period = np.array([10, 10, 5, 10])
         ref_bias_a = np.array([2, 3, 6.0, 0])
         ref_bias_phase = np.array([0, 0, 0, 0])
