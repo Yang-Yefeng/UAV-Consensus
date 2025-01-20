@@ -31,12 +31,13 @@ uav_par['dt'] = g_v['dt']  # 仅仅是为了防止采样周期不一样，全部
 uav_par['g_tm'] = g_v['g_tm']  # 仅仅是为了防止采样周期不一样，全部以global variable为准
 uav_par = uav_param(from_dict=uav_par)
 
-att_ctrl_param = get_att_pdt_fntsmc_param_from_XML(config_root)
+# att_ctrl_param = get_att_pdt_fntsmc_param_from_XML(config_root)
+att_ctrl_param = get_att_fntsmc_ctrl_param_from_XML(config_root)
 att_ctrl_param.dt = g_v['dt']
 pos_ctrl_param = get_pos_pdt_fntsmc_param_from_XML(config_root)
 pos_ctrl_param.dt = g_v['dt']
 
-TEST_GROUP = 0
+TEST_GROUP = 3
 # 0: 大圈逆时针，小圈不动
 # 1: 整体平移，小圈不动
 # 2: 第三组 大圈逆时针，小圈逆时针
@@ -51,6 +52,7 @@ SAVE = True
 
 '''generate uncertainty and global reference for all UAVs at all timesteps'''
 consensus_un = random_uncertainty_n(g_v['uav_num'], g_v['dt'], g_v['g_tm'], g_v['g_ideal'])
+# consensus_un = designed_uncertainty_n(g_v['uav_num'], g_v['dt'], g_v['g_tm'], g_v['g_ideal'])
 REF, DOT_REF, DOT2_REF, NU, DOT_NU, DOT2_NU, pos0 = ref_uav_consensus_sequence(g_v['dt'], g_v['g_tm'], TEST_GROUP)
 
 '''define drones'''
@@ -67,7 +69,7 @@ for i in range(g_v['uav_num']):
     obs_out = pdt_do(T0=np.array([1, 1, 1]).astype(float),
                      k1=np.array([1, 1, 1]).astype(float),
                      alpha=np.array([0.5, 0.5, 0.5]).astype(float),
-                     beta1=np.array([2, 2, 2]).astype(float),
+                     beta1=np.array([4, 4, 4]).astype(float),
                      beta2=np.array([1, 1, 1]).astype(float),
                      beta3=np.array([1, 1, 1]).astype(float),
                      dim=3,
@@ -199,12 +201,15 @@ if __name__ == '__main__':
             obs_rho_i[0] = 0.
             obs_rho_i[1] = 0.
             # 将观测器输出前两维度置为 0 即可
-            
+
             uavs[i].ctrl_att.control_update_inner(e_rho=e_rho_i,
                                                   dot_e_rho=de_rho_i,
                                                   dd_ref=np.zeros(3),
-                                                  A_rho=uavs[i].uav.A_rho(),
-                                                  B_rho=uavs[i].uav.B_rho(),
+                                                  W=uavs[i].uav.W(),
+                                                  dW=uavs[i].uav.dW(),
+                                                  omega=uavs[i].uav.omega(),
+                                                  A_omega=uavs[i].uav.A_omega(),
+                                                  B_omega=uavs[i].uav.B_omega(),
                                                   obs=obs_rho_i,
                                                   att_only=False)
             

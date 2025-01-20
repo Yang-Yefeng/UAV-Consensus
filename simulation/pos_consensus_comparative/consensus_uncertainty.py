@@ -172,3 +172,94 @@ def random_uncertainty_n(n: int, dt: float, tm: float, is_ideal: bool = False) -
 	for i in range(n):
 		dn[:, i * 6:(i + 1) * 6] = random_uncertainty(dt, tm, is_ideal)
 	return dn
+
+
+def designed_uncertainty_n(n: int, dt: float, tm: float, is_ideal: bool = False) -> np.ndarray:
+	N = int(np.round(tm / dt))
+	dn = np.zeros((N, 6 * n))
+	T = 5
+	w = 2 * np.pi / T
+	t1 = np.linspace(0, 10, 1000)	# 前10秒
+	t2 = np.linspace(10, 20, 1000)	# 中间10秒
+	t3 = np.linspace(20,30,1000)	# 后面10秒
+	phi0 = 0.
+
+	# uav1
+	Fdx1 = 0.5 * np.sin(w * t1 + phi0) + 0.2 * np.cos(3 * w * t1 + phi0) + 0.2
+	Fdy1 = 0.5 * np.cos(w * t1 + phi0) + 0.2 * np.sin(3 * w * t1 + phi0) + 0.4
+	Fdz1 = 0.5 * np.sin(w * t1 + phi0) + 0.2 * np.cos(3 * w * t1 + phi0) - 0.5
+
+	Fdx2 = np.sqrt(t2 - 10) + 1.5 * np.cos(np.sin(np.pi * (t2 - 10)))
+	Fdy2 = 0.5 * np.sqrt(t2 - 10) + 0.5 * np.cos(np.sin(np.pi * (t2 - 10)))
+	Fdz2 = 1.5 * np.sqrt(t2 - 10) - 1.0 * np.cos(np.sin(np.pi * (t2 - 10)))
+
+	Fdx3 = 3.2 * np.ones(1000)
+	Fdy3 = 2.0 * np.ones(1000)
+	Fdz3 = 0.0 * np.ones(1000)
+
+	Fdx = np.concatenate((Fdx1, Fdx2, Fdx3))
+	Fdy = np.concatenate((Fdy1, Fdy2, Fdy3))
+	Fdz = np.concatenate((Fdz1, Fdz2, Fdz3))
+
+	dn[:, 0] = Fdx.copy()
+	dn[:, 1] = Fdy.copy()
+	dn[:, 2] = Fdz.copy()
+
+	# uav2
+	Fdx1 = 1.2 * np.ones(1000)
+	Fdy1 = 1.0 * np.ones(1000)
+	Fdz1 = 0.5 * np.ones(1000)
+	Fdx2 = np.sqrt(t2 - 10) + 0.5 * np.cos(np.sin(np.pi * (t2 - 10)))
+	Fdy2 = 1.5 * np.sqrt(t2 - 10) + 0.5 * np.cos(np.sin(np.pi * (t2 - 10)))
+	Fdz2 = -0.6 * np.sqrt(t2 - 10) + 1.3 * np.cos(np.sin(np.pi * (t2 - 10)))
+	Fdx3 = 1.5 * np.sin(w * (t3-20) + phi0) + 1.2 * np.cos(3 * w * (t3-20) + phi0) + 0.
+	Fdy3 = 0.7 * np.cos(w * (t3-20) + phi0) + 0.7 * np.sin(3 * w * (t3-20) + phi0) + 0.
+	Fdz3 = 0.8 * np.sin(w * (t3-20) + phi0) + 0.1 * np.cos(3 * w * (t3-20) + phi0) - 0.
+
+	Fdx = np.concatenate((Fdx1, Fdx2, Fdx3))
+	Fdy = np.concatenate((Fdy1, Fdy2, Fdy3))
+	Fdz = np.concatenate((Fdz1, Fdz2, Fdz3))
+
+	dn[:, 6] = Fdx.copy()
+	dn[:, 7] = Fdy.copy()
+	dn[:, 8] = Fdz.copy()
+
+	# uav3
+	Fdx1 = np.sqrt(t1) + 1. * np.cos(np.sin(np.pi * t1))
+	Fdy1 = 0.5 * np.sqrt(t1) + 0.7 * np.cos(np.sin(np.pi * t1))
+	Fdz1 = 1.5 * np.sqrt(t1) - 1.2 * np.cos(np.sin(np.pi * t1))
+	Fdx2 = 0. * np.sin(w * (t2 - 10) + phi0) + 0.2 * np.cos(2 * w * (t2 - 10) + phi0) + 0.25
+	Fdy2 = 0.5 * np.cos(w * (t2 - 10) + phi0) + 0. * np.sin(2 * w * (t2 - 10) + phi0) + 0.1
+	Fdz2 = 0.85 * np.sin(w * (t2 - 10) + phi0) + 0.2 * np.cos(2 * w * (t2 - 10) + phi0) + 0.5
+	Fdx3 = 2.2 * np.ones(1000)
+	Fdy3 = 1.0 * np.ones(1000)
+	Fdz3 = -1.0 * np.ones(1000)
+
+	Fdx = np.concatenate((Fdx1, Fdx2, Fdx3))
+	Fdy = np.concatenate((Fdy1, Fdy2, Fdy3))
+	Fdz = np.concatenate((Fdz1, Fdz2, Fdz3))
+
+	dn[:, 12] = Fdx.copy()
+	dn[:, 13] = Fdy.copy()
+	dn[:, 14] = Fdz.copy()
+
+	# uav4
+	Fdx1 = -1.0 * np.sin(3 * w * t1 + phi0) + 0.8 * np.cos(2 * w * t1 + phi0) + 0.2
+	Fdy1 = 0.5 * np.cos(3 * w * t1 + phi0) + 0.15 * np.sin(2 * w * t1 + phi0) + 0.
+	Fdz1 = 0.85 * np.sin(3 * w * t1 + phi0) + 0.6 * np.cos(2 * w * t1 + phi0) + 0.5
+	Fdx2 = 1.2 * np.ones(1000)
+	Fdy2 = .0 * np.ones(1000)
+	Fdz2 = .0 * np.ones(1000)
+	Fdx3 = 0.25 * np.sqrt(t3 - 20) + 1.5 * np.cos(np.sin(np.pi * (t3 - 20)))
+	Fdy3 = 0.3 * np.sqrt(t3 - 20) + 0.2 * np.cos(np.sin(np.pi * (t3 - 20)))
+	Fdz3 = 1.8 * np.sqrt(t3 - 20) + 0.6 * np.cos(np.sin(np.pi * (t3 - 20)))
+
+	Fdx = np.concatenate((Fdx1, Fdx2, Fdx3))
+	Fdy = np.concatenate((Fdy1, Fdy2, Fdy3))
+	Fdz = np.concatenate((Fdz1, Fdz2, Fdz3))
+
+	dn[:, 18] = Fdx.copy()
+	dn[:, 19] = Fdy.copy()
+	dn[:, 20] = Fdz.copy()
+
+	return dn
