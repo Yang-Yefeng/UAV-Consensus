@@ -47,7 +47,7 @@ TEST_GROUP = 3
 '''uav group initialization'''
 USE_RL = False
 USE_OBS_IN = False
-USE_OBS_OUT = False
+USE_OBS_OUT = True
 SAVE = True
 
 '''generate uncertainty and global reference for all UAVs at all timesteps'''
@@ -216,8 +216,18 @@ if __name__ == '__main__':
             '''2.5 rk44 update'''
             action_4_uav_i = np.array([throttle, uavs[i].ctrl_att.control_in[0], uavs[i].ctrl_att.control_in[1], uavs[i].ctrl_att.control_in[2]])
             uavs[i].uav.rk44(action=action_4_uav_i, dis=dis_i, n=1, att_only=False)
+            if 0 < g_v['g_t'] <= 10:
+                uavs[i].uav.dm = -0.2
+            elif 10 < g_v['g_t'] <= 20:
+                uavs[i].uav.dm = 0.2
+            elif 20 < g_v['g_t'] <= 30:
+                uavs[i].uav.dm = 0.0
+            else:
+                uavs[i].uav.dm = 0.1
+
             
             '''2.6 data record'''
+            equiv_dis = np.array([dis_i[0], dis_i[1], dis_i[2]]) / (uavs[i].uav.m + uavs[i].uav.dm) + uavs[i].uav.A_with_dm() - uavs[i].uav.A()
             data_block_i = {'time': uavs[i].uav.time,
                             'control': action_4_uav_i,
                             'ref_angle': uavs[i].rho_d,
@@ -225,7 +235,7 @@ if __name__ == '__main__':
                             'ref_vel': dot_ref[0: 3] + dot_nu[i],
                             'd_in': np.array([0., 0., np.dot(uavs[i].uav.W(), np.array([dis_i[3], dis_i[4], dis_i[5]]))[2]]),
                             'd_in_obs': obs_rho_i,
-                            'd_out': np.array([dis_i[0], dis_i[1], dis_i[2]]) / uavs[i].uav.m,
+                            'd_out': equiv_dis,
                             'd_out_obs': obs_eta_i,
                             'state': uavs[i].uav.uav_state_call_back()}
             uavs[i].data_record.record(data=data_block_i)

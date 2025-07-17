@@ -78,6 +78,7 @@ class uav_param:
 class UAV:
     def __init__(self, param: uav_param):
         self.m = param.m  # 无人机质量
+        self.dm = 0.  # 无人机质量不确定性
         self.g = param.g  # 重力加速度
         self.J = param.J  # 转动惯量
         self.d = param.d  # 机臂长度 'X'构型
@@ -182,11 +183,11 @@ class UAV:
         '''3. 无人机在惯性系下的位置 x y z 和速度 vx vy vz 的微分方程'''
         [dx, dy, dz] = [_vx, _vy, _vz]
         dvx = (self.throttle * (np.cos(_psi) * np.sin(_theta) * np.cos(_phi) + np.sin(_psi) * np.sin(_phi))
-               - self.kt * _vx + dis[0]) / self.m
+               - self.kt * _vx + dis[0]) / (self.m + self.dm)
         dvy = (self.throttle * (np.sin(_psi) * np.sin(_theta) * np.cos(_phi) - np.cos(_psi) * np.sin(_phi))
-               - self.kt * _vy + dis[1]) / self.m
+               - self.kt * _vy + dis[1]) / (self.m + self.dm)
         dvz = -self.g + (self.throttle * np.cos(_phi) * np.cos(_theta)
-                         - self.kt * _vz + dis[2]) / self.m
+                         - self.kt * _vz + dis[2]) / (self.m + self.dm)
         '''3. 无人机在惯性系下的位置 x y z 和速度 vx vy vz 的微分方程'''
 
         return np.array([dx, dy, dz, dvx, dvy, dvz, dphi, dtheta, dpsi, dp, dq, dr])
@@ -323,6 +324,11 @@ class UAV:
         return self.control[0] / self.m * np.array([C(self.phi) * C(self.psi) * S(self.theta) + S(self.phi) * S(self.psi),
                                                     C(self.phi) * S(self.psi) * S(self.theta) - S(self.phi) * C(self.psi),
                                                     C(self.phi) * C(self.theta)]) - np.array([0., 0., self.g])
+
+    def A_with_dm(self):
+        return self.control[0] / (self.m + self.dm) * np.array([C(self.phi) * C(self.psi) * S(self.theta) + S(self.phi) * S(self.psi),
+                                                                C(self.phi) * S(self.psi) * S(self.theta) - S(self.phi) * C(self.psi),
+                                                                C(self.phi) * C(self.theta)]) - np.array([0., 0., self.g])
 
     def second_order_att_dynamics(self) -> np.ndarray:
         return np.dot(self.dW(), self.rho2()) + np.dot(self.W(), self.f2())
